@@ -7,10 +7,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 
 def main():
+    # Logo in upper right
+    logo_path = Path("TTU_LOGO.jpg")
+    if logo_path.exists():
+        col1, col2 = st.columns([6, 1])
+        with col2:
+            st.image(str(logo_path), width=120)
+    
     # Page title and description
     st.title("Reports")
     st.markdown("""

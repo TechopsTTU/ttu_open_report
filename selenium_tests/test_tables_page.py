@@ -12,7 +12,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
         service = Service("C:/edgedriver_win64/msedgedriver.exe")
         cls.driver = webdriver.Edge(service=service)
         cls.driver.maximize_window()
-        cls.driver.get("http://localhost:8501/tables")
+        cls.driver.get("http://localhost:8502/tables")
         time.sleep(3)  # Wait for Streamlit to load
 
     @classmethod
@@ -20,7 +20,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
         cls.driver.quit()
 
     def test_tables_page_loads(self):
-        self.driver.get("http://localhost:8501/tables")
+        self.driver.get("http://localhost:8502/tables")
         time.sleep(1)
         # Check if the Tables page loads and the radio button is present
         self.assertIn("Tables", self.driver.page_source)
@@ -28,7 +28,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
         self.assertTrue(any(rb.get_attribute("type") == "radio" for rb in radio_buttons))
 
     def test_table_selection(self):
-        self.driver.get("http://localhost:8501/tables")
+        self.driver.get("http://localhost:8502/tables")
         time.sleep(2)
         radio_buttons = self.driver.find_elements(By.CSS_SELECTOR, "input[type='radio']")
         for rb in radio_buttons:
@@ -42,7 +42,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
                 print(f"Radio button not interactable: {e}")
 
     def test_schema_display(self):
-        self.driver.get("http://localhost:8501/tables")
+        self.driver.get("http://localhost:8502/tables")
         time.sleep(2)
         radio_buttons = self.driver.find_elements(By.CSS_SELECTOR, "input[type='radio']")
         if radio_buttons:
@@ -58,7 +58,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
             self.fail("No radio buttons found on Tables page.")
 
     def test_data_preview(self):
-        self.driver.get("http://localhost:8501/tables")
+        self.driver.get("http://localhost:8502/tables")
         time.sleep(1)
         # Check if data preview table is present
         self.assertIn("Preview", self.driver.page_source)
@@ -66,7 +66,7 @@ class StreamlitTablesPageTests(unittest.TestCase):
         self.assertTrue(len(tables) > 0)
 
     def test_csv_download(self):
-        self.driver.get("http://localhost:8501/tables")
+        self.driver.get("http://localhost:8502/tables")
         time.sleep(2)
         self.assertTrue(any("Download" in b.text for b in self.driver.find_elements(By.TAG_NAME, "button")), "Download button not found.")
 

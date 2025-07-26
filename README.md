@@ -48,6 +48,7 @@ Copy `.env.example` to `.env` and fill in your credentials and Access DB path.
 
 - `pytest tests/` for unit tests
 - `python -m unittest selenium_tests/test_tables_page.py` for UI tests
+- `pytest --maxfail=3 --disable-warnings`
 
 Check that `cache/raw/` is populated and `schema.json` updates.
 

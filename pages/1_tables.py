@@ -8,6 +8,14 @@ from selenium.webdriver.edge.service import Service
 import time
 
 st.set_page_config(page_title="TTU Open Report - Tables", layout="wide")
+
+# Logo in upper right
+logo_path = Path("TTU_LOGO.jpg")
+if logo_path.exists():
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        st.image(str(logo_path), width=120)
+
 st.title("Tables")
 st.markdown("""
 Welcome to the TTU Open Report dashboard. Select a table below to preview its schema and data. Use the search box to filter results. Download any table as CSV for further analysis.
