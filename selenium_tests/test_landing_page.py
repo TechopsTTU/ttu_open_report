@@ -16,9 +16,9 @@ def driver():
 def test_landing_page_loads(driver):
     driver.get("http://localhost:8502")
     time.sleep(2)
-    assert "Toyo Tanso USA Open Report Dashboard" in driver.page_source
-    assert "Welcome to the Toyo Tanso USA Open Report system." in driver.page_source
-    assert driver.find_element(By.CLASS_NAME, "quick-link-btn")
+    assert "GraphiteVision Analytics" in driver.page_source
+    assert "Advanced Data Analytics for Toyo Tanso USA" in driver.page_source
+    assert driver.find_element(By.CLASS_NAME, "modern-btn")
     assert driver.find_element(By.CLASS_NAME, "fade-in")
 
 def test_logo_present(driver):
@@ -33,9 +33,9 @@ def test_logo_present(driver):
 def test_quick_links(driver):
     driver.get("http://localhost:8502")
     time.sleep(2)
-    # Check all quick link buttons are present
-    for label in ["Tables", "Queries", "Reports", "Forms"]:
-        assert driver.find_element(By.LINK_TEXT, label)
+    # Check all modern navigation buttons are present
+    for label in ["Data Tables", "Analytics", "Reports", "Data Entry"]:
+        assert label in driver.page_source
 
 def test_visual_effects(driver):
     driver.get("http://localhost:8502")

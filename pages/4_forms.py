@@ -8,9 +8,9 @@ if logo_path.exists():
     with col2:
         st.image(str(logo_path), width=120)
 
-st.title("Forms (coming soon)")
+st.title("Data Entry Portal")
 st.markdown("""
-This page will allow you to enter new data and submit forms. For now, try out the sample form below.
+Enter new data and submit forms through this secure portal. Try out the sample form below to test functionality.
 """)
 
 with st.form("entry_form"):

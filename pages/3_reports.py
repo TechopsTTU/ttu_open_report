@@ -20,9 +20,9 @@ def main():
             st.image(str(logo_path), width=120)
     
     # Page title and description
-    st.title("Reports")
+    st.title("Interactive Reports")
     st.markdown("""
-    Visualize your business data with interactive charts. These are sample reports; live charts will appear once your backend is connected.
+    Visualize your business data with interactive charts and comprehensive reports. These sample visualizations will display real-time data once your database is connected.
     """)
 
     # Generate mock data for chart with error handling

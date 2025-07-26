@@ -1,12 +1,12 @@
-# ttu_open_report
+# GraphiteVision Analytics
 
-TTU Open Report is a modular Python/Streamlit application for extracting, visualizing, and reporting on Access database tables. It supports both mock/sample data and real Access DB connections, enabling:
-- Data extraction and preview
-- Business queries and analytics
+GraphiteVision Analytics is a comprehensive business intelligence platform for Toyo Tanso USA, designed for extracting, visualizing, and reporting on manufacturing and operational data. It supports both mock/sample data and real database connections, enabling:
+- Advanced data extraction and preview
+- Business analytics and operational insights
 - Interactive reports and charts
-- Data entry forms
+- Secure data entry portal
 
-The app is designed for teams needing quick insights and reporting from Access databases, with robust testing and easy onboarding.
+The application is specifically tailored for graphite manufacturing operations, providing teams with quick insights and comprehensive reporting capabilities.
 
 ## Project Structure
 - `extract.py`: Main extraction script

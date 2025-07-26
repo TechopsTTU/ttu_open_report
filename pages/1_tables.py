@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 import time
 
-st.set_page_config(page_title="TTU Open Report - Tables", layout="wide")
+st.set_page_config(page_title="GraphiteVision Analytics - Tables", layout="wide")
 
 # Logo in upper right
 logo_path = Path("TTU_LOGO.jpg")
@@ -16,9 +16,9 @@ if logo_path.exists():
     with col2:
         st.image(str(logo_path), width=120)
 
-st.title("Tables")
+st.title("Data Tables")
 st.markdown("""
-Welcome to the TTU Open Report dashboard. Select a table below to preview its schema and data. Use the search box to filter results. Download any table as CSV for further analysis.
+Welcome to GraphiteVision Analytics. Select a table below to preview its schema and data. Use the search box to filter results. Download any table as CSV for further analysis.
 """)
 
 # 1. load schema.json
