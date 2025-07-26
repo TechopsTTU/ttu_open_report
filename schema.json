@@ -1,0 +1,29 @@
+{
+  "Customers": {
+    "fields": [
+      {"name": "CustomerID", "type": "integer"},
+      {"name": "Name", "type": "string"},
+      {"name": "Email", "type": "string"},
+      {"name": "JoinDate", "type": "date"}
+    ]
+  },
+  "Orders": {
+    "fields": [
+      {"name": "OrderID", "type": "integer"},
+      {"name": "CustomerID", "type": "integer"},
+      {"name": "ProductID", "type": "integer"},
+      {"name": "OrderDate", "type": "date"},
+      {"name": "Quantity", "type": "integer"},
+      {"name": "Total", "type": "float"}
+    ]
+  },
+  "Products": {
+    "fields": [
+      {"name": "ProductID", "type": "integer"},
+      {"name": "ProductName", "type": "string"},
+      {"name": "Category", "type": "string"},
+      {"name": "Price", "type": "float"},
+      {"name": "Stock", "type": "integer"}
+    ]
+  }
+}
