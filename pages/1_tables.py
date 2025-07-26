@@ -39,11 +39,15 @@ st.subheader("Schema")
 # When displaying schema, handle missing 'nullable' key gracefully
 schema_table = []
 for col in columns:
-    schema_table.append({
-        "Column": col.get("name", "N/A"),
-        "Type": col.get("type", "N/A"),
-        "Nullable": col.get("nullable", "N/A")
-    })
+    if isinstance(col, dict):
+        schema_table.append({
+            "Column": col.get("name", "N/A"),
+            "Type": col.get("type", "N/A"),
+            "Nullable": col.get("nullable", "N/A")
+        })
+    else:
+        # Optionally log or display a warning for malformed schema entry
+        pass
 st.table(schema_table)
 
 # Data preview and search/filter
