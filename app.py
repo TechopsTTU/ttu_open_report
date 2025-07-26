@@ -36,6 +36,9 @@ def main():
         margin: 20px 0;
         flex-wrap: wrap;
     }
+    .modern-nav-container a {
+        text-decoration: none;
+    }
     .modern-btn {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
@@ -96,11 +99,6 @@ def main():
         font-weight: 300;
     }
     </style>
-    <script>
-    function navigateToPage(page) {
-        window.open(window.location.origin + '/' + page, '_self');
-    }
-    </script>
     """, unsafe_allow_html=True)
 
     # Display logo with fade-in animation if available
@@ -124,18 +122,26 @@ def main():
     # Modern navigation buttons on the right
     st.markdown('''
     <div class="modern-nav-container fade-in">
-        <button class="modern-btn" onclick="navigateToPage('tables')">
-            📊 Data Tables
-        </button>
-        <button class="modern-btn" onclick="navigateToPage('queries')">
-            🔍 Analytics
-        </button>
-        <button class="modern-btn" onclick="navigateToPage('reports')">
-            📈 Reports
-        </button>
-        <button class="modern-btn" onclick="navigateToPage('forms')">
-            📝 Data Entry
-        </button>
+        <a href="/tables" target="_self">
+            <button class="modern-btn">
+                📊 Data Tables
+            </button>
+        </a>
+        <a href="/queries" target="_self">
+            <button class="modern-btn">
+                🔍 Analytics
+            </button>
+        </a>
+        <a href="/reports" target="_self">
+            <button class="modern-btn">
+                📈 Reports
+            </button>
+        </a>
+        <a href="/forms" target="_self">
+            <button class="modern-btn">
+                📝 Data Entry
+            </button>
+        </a>
     </div>
     ''', unsafe_allow_html=True)
 
