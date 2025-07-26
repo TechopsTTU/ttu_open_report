@@ -1,0 +1,6 @@
+pandas
+pyodbc
+matplotlib
+pytest
+streamlit
+python-dotenv
