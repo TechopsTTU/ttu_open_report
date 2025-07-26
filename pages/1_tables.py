@@ -66,6 +66,7 @@ else:
 search = st.text_input("Search table (case-insensitive)")
 if search:
     df = df[df.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)]
+st.markdown("### Preview")
 st.dataframe(df, use_container_width=True)
 st.download_button(
     "Download as CSV",
