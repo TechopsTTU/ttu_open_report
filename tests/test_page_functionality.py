@@ -208,7 +208,7 @@ class TestDataProcessingUtilities:
         test_data = pd.DataFrame({
             'mixed_numbers': ['1', '2.5', '3', 'invalid'],
             'dates': ['2025-01-01', '2025-13-01', 'invalid', '2025-07-26'],
-            'booleans': ['true', 'false', '1', '0', 'maybe']
+            'booleans': ['true', 'false', '1', '0']
         })
         
         # Test numeric conversion with error handling
