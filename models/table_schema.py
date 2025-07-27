@@ -10,15 +10,23 @@ logging.basicConfig(level=logging.INFO)
 TABLE_CLASSES: Dict[str, Any] = {}
 
 def map_column_type(type_str):
-    """Maps a DB column type string to a Python type."""
-    t = type_str.upper()
-    if t.startswith("VARCHAR") or t.startswith("CHAR") or t.startswith("TEXT"):
-        return str
-    if t in ("LONG", "INTEGER", "INT", "SMALLINT"):
-        return int
-    if t == "DATETIME":
-        return datetime.datetime
-    return object
+    """Map a DB column type string to a pandas-friendly dtype string."""
+    if not type_str:
+        return "object"
+
+    t = type_str.lower()
+
+    if t.startswith("varchar") or t.startswith("char") or t.startswith("text"):
+        return "object"
+    if t in ("long", "integer", "int", "smallint"):
+        return "int64"
+    if t in ("decimal", "numeric"):
+        return "object"
+    if t in ("float", "real", "double"):
+        return "float64"
+    if t.startswith("datetime") or t in ("date", "timestamp"):
+        return "datetime64[ns]"
+    return "object"
 
 def load_schema(schema_path="schema.json"):
     """

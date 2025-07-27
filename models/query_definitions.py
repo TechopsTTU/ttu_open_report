@@ -50,8 +50,17 @@ def get_ds_connection():
         logging.error(f"Database connection failed: {e}")
         raise
 
-def run_pass_through(sql: str) -> pd.DataFrame:
-    """Executes a SQL query and returns the result as a DataFrame."""
+def run_pass_through(sql: str, params: list | tuple | None = None) -> pd.DataFrame:
+    """Executes a SQL query and returns the result as a DataFrame.
+
+    Parameters
+    ----------
+    sql : str
+        SQL statement to execute.
+    params : list | tuple | None
+        Optional query parameters passed to ``pandas.read_sql``. If ``None``,
+        the query executes without parameters.
+    """
     # Check if we're in development mode (use SQLite)
     use_sqlite = os.getenv("USE_SQLITE", "true").lower() == "true"
     
@@ -62,33 +71,79 @@ def run_pass_through(sql: str) -> pd.DataFrame:
                 logging.warning("SQLite connection unavailable. Returning empty DataFrame.")
                 return pd.DataFrame()
             with conn:
-                df = pd.read_sql(sql, conn)
+                if params:
+                    df = pd.read_sql(sql, conn, params=params)
+                else:
+                    df = pd.read_sql(sql, conn)
         else:
             with get_ds_connection() as conn:
-                df = pd.read_sql(sql, conn)
+                if params:
+                    df = pd.read_sql(sql, conn, params=params)
+                else:
+                    df = pd.read_sql(sql, conn)
         logging.info("Query executed successfully.")
         return df
     except Exception as e:
         logging.error(f"Query execution failed: {e}")
         return pd.DataFrame()
 
-def q010_open_order_report_data() -> pd.DataFrame:
-    """Returns Open Order Report data from database."""
-    sql = """
-    SELECT 
-        o.OrderID,
-        o.OrderDate,
-        c.CompanyName as Customer,
-        o.Status,
-        SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) as Amount
-    FROM Orders o
-    JOIN Customers c ON o.CustomerID = c.CustomerID
-    JOIN OrderDetails od ON o.OrderID = od.OrderID
-    WHERE o.Status IN ('Open', 'Processing')
-    GROUP BY o.OrderID, o.OrderDate, c.CompanyName, o.Status
-    ORDER BY o.OrderDate DESC
+def q010_open_order_report_data(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    customer_id: int | None = None,
+    statuses: list | None = None,
+) -> pd.DataFrame:
+    """Return Open Order Report data filtered by optional parameters.
+
+    Parameters
+    ----------
+    start_date : str | None
+        Minimum ``OrderDate`` to include (ISO format ``YYYY-MM-DD``).
+    end_date : str | None
+        Maximum ``OrderDate`` to include.
+    customer_id : int | None
+        Limit results to a specific customer ID.
+    statuses : list | None
+        Order status values to filter. Defaults to ``['Open', 'Processing']``.
     """
-    return run_pass_through(sql)
+
+    if statuses is None:
+        statuses = ["Open", "Processing"]
+
+    sql = """
+        SELECT
+            o.OrderID,
+            o.OrderDate,
+            c.CustomerName as CustomerName,
+            o.Status,
+            o.TotalAmount AS TotalAmount
+        FROM Orders o
+        JOIN Customers c ON o.CustomerID = c.CustomerID
+        WHERE 1=1
+    """
+
+    params: list = []
+
+    if statuses:
+        placeholders = ",".join(["?"] * len(statuses))
+        sql += f" AND o.Status IN ({placeholders})"
+        params.extend(statuses)
+
+    if start_date:
+        sql += " AND o.OrderDate >= ?"
+        params.append(start_date)
+
+    if end_date:
+        sql += " AND o.OrderDate <= ?"
+        params.append(end_date)
+
+    if customer_id:
+        sql += " AND o.CustomerID = ?"
+        params.append(customer_id)
+
+    sql += "\n    ORDER BY o.OrderDate DESC"
+
+    return run_pass_through(sql, params if params else None)
 
 def q093_shipment_status() -> pd.DataFrame:
     """Returns Shipment Status data from database."""
@@ -98,9 +153,7 @@ def q093_shipment_status() -> pd.DataFrame:
         s.OrderID,
         s.ShippedDate,
         s.Status,
-        s.TrackingNumber,
-        s.Carrier,
-        s.DeliveryDate
+        s.TrackingNumber
     FROM Shipments s
     JOIN Orders o ON s.OrderID = o.OrderID
     ORDER BY s.ShippedDate DESC
