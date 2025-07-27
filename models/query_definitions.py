@@ -9,18 +9,19 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 
 def get_sqlite_connection():
-    """Connects to the SQLite test database."""
+    """Connect to the SQLite test database if it exists."""
     db_path = Path("graphite_analytics.db")
     if not db_path.exists():
-        raise FileNotFoundError(f"SQLite database not found: {db_path}. Run create_test_db.py first.")
-    
+        logging.warning(f"SQLite database not found: {db_path}")
+        return None
+
     try:
         conn = sqlite3.connect(str(db_path))
         logging.info("SQLite database connection established.")
         return conn
     except Exception as e:
         logging.error(f"SQLite database connection failed: {e}")
-        raise
+        return None
 
 def build_connection_string():
     """Builds the ODBC connection string from environment variables."""
@@ -56,7 +57,11 @@ def run_pass_through(sql: str) -> pd.DataFrame:
     
     try:
         if use_sqlite:
-            with get_sqlite_connection() as conn:
+            conn = get_sqlite_connection()
+            if conn is None:
+                logging.warning("SQLite connection unavailable. Returning empty DataFrame.")
+                return pd.DataFrame()
+            with conn:
                 df = pd.read_sql(sql, conn)
         else:
             with get_ds_connection() as conn:
@@ -65,7 +70,7 @@ def run_pass_through(sql: str) -> pd.DataFrame:
         return df
     except Exception as e:
         logging.error(f"Query execution failed: {e}")
-        raise
+        return pd.DataFrame()
 
 def q010_open_order_report_data() -> pd.DataFrame:
     """Returns Open Order Report data from database."""

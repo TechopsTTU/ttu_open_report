@@ -1,27 +1,3 @@
-def map_column_type(type_str):
-    t = type_str.upper()
-    if t.startswith("VARCHAR") or t.startswith("CHAR") or t.startswith("TEXT"):
-        return str
-    if t in ("LONG", "INTEGER", "INT", "SMALLINT"):
-        return int
-    if t == "DATETIME":
-        return datetime.datetime
-    return object
-def load_schema(schema_path="schema.json"):
-    path = Path(schema_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Schema file not found: {schema_path}")
-    with path.open() as f:
-        schema = json.load(f)
-    # Build dataclasses for each table
-    for table_name, columns in schema.items():
-        fields = []
-        for col in columns:
-            pytype = map_column_type(col["type"])
-            fields.append((col["name"], pytype, None))
-        cls = make_dataclass(table_name, fields)
-        TABLE_CLASSES[table_name] = cls
-    return schema
 import json
 import datetime
 import logging
