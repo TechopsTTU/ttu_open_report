@@ -334,6 +334,7 @@ class TestErrorHandling:
         result = run_pass_through(invalid_query)
         assert isinstance(result, pd.DataFrame)
         # Should return empty DataFrame on error
+        assert result.empty
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
