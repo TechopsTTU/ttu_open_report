@@ -1,6 +1,4 @@
 import os
-import pyodbc
-import pandas as pd
 import logging
 import sqlite3
 from pathlib import Path
@@ -41,6 +39,7 @@ def build_connection_string():
 
 def get_ds_connection():
     """Attempts to connect to the NdustrOS database using ODBC."""
+    import pyodbc
     conn_str = build_connection_string()
     try:
         conn = pyodbc.connect(conn_str)
@@ -50,7 +49,7 @@ def get_ds_connection():
         logging.error(f"Database connection failed: {e}")
         raise
 
-def run_pass_through(sql: str, params: list | tuple | None = None) -> pd.DataFrame:
+def run_pass_through(sql: str, params: list | tuple | None = None) -> 'pd.DataFrame':
     """Executes a SQL query and returns the result as a DataFrame.
 
     Parameters
@@ -61,6 +60,8 @@ def run_pass_through(sql: str, params: list | tuple | None = None) -> pd.DataFra
         Optional query parameters passed to ``pandas.read_sql``. If ``None``,
         the query executes without parameters.
     """
+    # Import pandas lazily to avoid mandatory dependency at import time
+    import pandas as pd
     # Check if we're in development mode (use SQLite)
     use_sqlite = os.getenv("USE_SQLITE", "true").lower() == "true"
     
@@ -92,7 +93,7 @@ def q010_open_order_report_data(
     end_date: str | None = None,
     customer_id: int | None = None,
     statuses: list | None = None,
-) -> pd.DataFrame:
+) -> 'pd.DataFrame':
     """Return Open Order Report data filtered by optional parameters.
 
     Parameters
@@ -145,7 +146,7 @@ def q010_open_order_report_data(
 
     return run_pass_through(sql, params if params else None)
 
-def q093_shipment_status() -> pd.DataFrame:
+def q093_shipment_status() -> 'pd.DataFrame':
     """Returns Shipment Status data from database."""
     sql = """
     SELECT 

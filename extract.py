@@ -1,7 +1,5 @@
 import argparse
 import os
-import pyodbc
-import pandas as pd
 import json
 import logging
 from pathlib import Path
@@ -28,6 +26,7 @@ def sanitize_filename(name):
 
 def connect_to_access(db_path):
     """Connects to an Access database and returns the connection object."""
+    import pyodbc
     conn_str = (
         f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};"
         f"DBQ={db_path};"
@@ -56,6 +55,7 @@ def list_tables_and_views(conn):
 
 def export_table(conn, table_name, output_dir):
     """Exports a table to CSV in the specified output directory."""
+    import pandas as pd
     safe_name = sanitize_filename(table_name)
     try:
         df = pd.read_sql(f"SELECT * FROM [{table_name}]", conn)
