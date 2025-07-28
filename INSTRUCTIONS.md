@@ -14,7 +14,7 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
      ```
      NDUSTROS_USER=TTUSA\NDUSTROS
      NDUSTROS_PASS=your_password_here
-     ACCESS_DB_PATH=Opnordrp-vlad-copy.accdb
+    ACCESS_DB_PATH=Openordrp-vlad-copy.accdb
      ACCESS_DB_DRIVER={Microsoft Access Driver (*.mdb, *.accdb)}
      ```
 4. **Run the Streamlit app**
@@ -27,7 +27,7 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
 
 ## Mock Data & Sample Usage
 - Sample CSVs are in `cache/raw/` for UI testing and development.
-- The Access database file is `Opnordrp-vlad-copy.accdb` (for local extraction).
+- The Access database file is `Openordrp-vlad-copy.accdb` (for local extraction).
 - Schema is defined in `schema.json` and matches sample data.
 
 ## Real DB Connection
