@@ -221,7 +221,7 @@ class TestRunPassThrough:
                 mock_conn.return_value = mock_connection
                 
                 # Mock pandas read_sql to return test data
-                with patch('models.query_definitions.pd.read_sql') as mock_read_sql:
+                with patch('pandas.read_sql') as mock_read_sql:
                     mock_read_sql.return_value = pd.DataFrame({'test_column': [1]})
                     
                     result = run_pass_through(test_query)
@@ -236,13 +236,13 @@ class TestRunPassThrough:
         test_query = "SELECT 1 as test_column"
         
         with patch('models.query_definitions.os.getenv', return_value='false'):
-            with patch('models.query_definitions.pyodbc.connect') as mock_connect:
+            with patch('pyodbc.connect') as mock_connect:
                 # Mock successful ODBC connection
                 mock_connection = MagicMock()
                 mock_connect.return_value = mock_connection
                 
                 # Mock pandas read_sql to return test data
-                with patch('models.query_definitions.pd.read_sql') as mock_read_sql:
+                with patch('pandas.read_sql') as mock_read_sql:
                     mock_read_sql.return_value = pd.DataFrame({'test_column': [1]})
                     
                     result = run_pass_through(test_query)
@@ -320,7 +320,7 @@ class TestErrorHandling:
             mock_connection = MagicMock()
             mock_conn.return_value = mock_connection
             
-            with patch('models.query_definitions.pd.read_sql') as mock_read_sql:
+            with patch('pandas.read_sql') as mock_read_sql:
                 mock_read_sql.return_value = pd.DataFrame()  # Empty DataFrame
                 
                 result = q010_open_order_report_data()
