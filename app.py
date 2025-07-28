@@ -137,6 +137,11 @@ def main():
                 📈 Reports
             </button>
         </a>
+        <a href="/open_order_report" target="_self">
+            <button class="modern-btn">
+                📄 Open Orders
+            </button>
+        </a>
         <a href="/forms" target="_self">
             <button class="modern-btn">
                 📝 Data Entry

@@ -9,13 +9,17 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
    - Use a virtual environment (recommended)
    - Run: `pip install -r requirements.txt`
 3. **Configure environment variables**
-   - Copy `.env.example` to `.env` and fill in your credentials and Access DB path
+   - Copy `.env.example` to `.env` and fill in your credentials, SQL Server details, and Access DB path
    - Example:
      ```
      NDUSTROS_USER=TTUSA\NDUSTROS
      NDUSTROS_PASS=your_password_here
-     ACCESS_DB_PATH=Opnordrp-vlad-copy.accdb
+    ACCESS_DB_PATH=Openordrp-vlad-copy.accdb
      ACCESS_DB_DRIVER={Microsoft Access Driver (*.mdb, *.accdb)}
+     NDUSTROS_DRIVER={ODBC Driver 17 for SQL Server}
+     NDUSTROS_SERVER=your_sql_server_hostname
+     NDUSTROS_PORT=1433
+     NDUSTROS_DB=GraphiteVision
      ```
 4. **Run the Streamlit app**
    - `streamlit run app.py`
@@ -27,12 +31,12 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
 
 ## Mock Data & Sample Usage
 - Sample CSVs are in `cache/raw/` for UI testing and development.
-- The Access database file is `Opnordrp-vlad-copy.accdb` (for local extraction).
+- The Access database file is `Openordrp-vlad-copy.accdb` (for local extraction).
 - Schema is defined in `schema.json` and matches sample data.
 
 ## Real DB Connection
 - Ensure you have Access drivers installed (Windows: ODBC, `pyodbc`).
-- Update `.env` with real credentials and DB path.
+- Update `.env` with real credentials, server details, and DB path.
 - Test connection using the provided utility in `models/query_definitions.py`.
 
 ## Troubleshooting
@@ -46,7 +50,7 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
 ## Team Onboarding Checklist
 - [ ] Clone repo and set up virtual environment
 - [ ] Install dependencies
-- [ ] Copy `.env.example` to `.env` and fill in credentials
+- [ ] Copy `.env.example` to `.env` and fill in credentials and server info
 - [ ] Run Streamlit app and verify UI with mock/sample data
 - [ ] Run all tests (unit and UI)
 - [ ] Update `.env` for real DB access when available

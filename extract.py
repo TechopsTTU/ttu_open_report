@@ -1,36 +1,5 @@
-def sanitize_filename(name):
-    # Replace invalid Windows filename characters with underscores
-    invalid = r'\\/:*?"<>|'
-    return ''.join('_' if c in invalid else c for c in name)
-def connect_to_access(db_path):
-    conn_str = (
-        f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};"
-        f"DBQ={db_path};"
-    )
-    return pyodbc.connect(conn_str)
-def list_tables_and_views(conn):
-    cursor = conn.cursor()
-    tables = []
-    for row in cursor.tables():
-        if row.table_type in ("TABLE", "VIEW"):
-            tables.append(row.table_name)
-    return tables
-def export_table(conn, table_name, output_dir):
-    safe_name = sanitize_filename(table_name)
-    df = pd.read_sql(f"SELECT * FROM [{table_name}]", conn)
-    out_path = Path(output_dir) / f"{safe_name}.csv"
-    df.to_csv(out_path, index=False)
-    return df
-def generate_schema(conn, table_names):
-    schema = {}
-    cursor = conn.cursor()
-    for table in table_names:
-        safe_name = sanitize_filename(table)
-        columns = []
 import argparse
 import os
-import pyodbc
-import pandas as pd
 import json
 import logging
 from pathlib import Path
@@ -40,10 +9,24 @@ logging.basicConfig(level=logging.INFO)
 def sanitize_filename(name):
     """Replace invalid Windows filename characters with underscores."""
     invalid = r'\\/:*?"<>|'
-    return ''.join('_' if c in invalid else c for c in name)
+    sanitized = ''.join('_' if c in invalid else c for c in name)
+    if any(ch in invalid for ch in name):
+        base, dot, ext = sanitized.partition('.')
+        if dot and ext:
+            if not base.endswith('_'):
+                base += '_'
+            sanitized = base + dot + ext
+        elif dot and not ext:
+            sanitized = sanitized + '.'
+        else:
+            sanitized = sanitized + '_'
+    if len(sanitized) > 255:
+        sanitized = sanitized[:255]
+    return sanitized
 
 def connect_to_access(db_path):
     """Connects to an Access database and returns the connection object."""
+    import pyodbc
     conn_str = (
         f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};"
         f"DBQ={db_path};"
@@ -72,6 +55,7 @@ def list_tables_and_views(conn):
 
 def export_table(conn, table_name, output_dir):
     """Exports a table to CSV in the specified output directory."""
+    import pandas as pd
     safe_name = sanitize_filename(table_name)
     try:
         df = pd.read_sql(f"SELECT * FROM [{table_name}]", conn)
