@@ -2,6 +2,8 @@ import os
 import logging
 import sqlite3
 from pathlib import Path
+import pandas as pd
+import pyodbc
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,7 +41,6 @@ def build_connection_string():
 
 def get_ds_connection():
     """Attempts to connect to the NdustrOS database using ODBC."""
-    import pyodbc
     conn_str = build_connection_string()
     try:
         conn = pyodbc.connect(conn_str)
