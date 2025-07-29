@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import date
 from pathlib import Path
-from models.query_definitions import q010_open_order_report_data
+from models.query_definitions import get_open_orders_report
 
 # Logo in upper right
 logo_path = Path("TTU_LOGO.jpg")
@@ -24,11 +24,10 @@ with st.form("filters"):
     submitted = st.form_submit_button("Run Report")
 
 if submitted:
-    df = q010_open_order_report_data(
-        start_date=start_date.isoformat() if isinstance(start_date, date) else None,
-        end_date=end_date.isoformat() if isinstance(end_date, date) else None,
-        customer_id=int(customer_id) if customer_id else None,
-        statuses=statuses,
+    # Only use date range for get_open_orders_report; other filters not implemented
+    df = get_open_orders_report(
+        start_date=start_date.isoformat() if isinstance(start_date, date) else '2025-01-01',
+        end_date=end_date.isoformat() if isinstance(end_date, date) else '2025-12-31'
     )
     if not df.empty:
         st.dataframe(df, use_container_width=True)
