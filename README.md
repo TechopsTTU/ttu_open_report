@@ -46,9 +46,9 @@ Copy `.env.example` to `.env` and fill in your credentials and Access DB path.
 
 ### 5. Running tests
 
-- `pytest tests/` for unit tests
+- `pytest` for unit tests (uses `pytest.ini` for options)
 - `python -m unittest selenium_tests/test_tables_page.py` for UI tests
-- `pytest --maxfail=3 --disable-warnings`
+- Generate an HTML report with `pytest --html=reports/report.html --self-contained-html`
 
 Check that `cache/raw/` is populated and `schema.json` updates.
 

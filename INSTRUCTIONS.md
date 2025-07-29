@@ -22,7 +22,7 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
 5. **Run extraction**
    - `python extract.py --help` for options
 6. **Run tests**
-   - `pytest tests/` for unit tests
+   - `pytest` (uses `pytest.ini` to generate an HTML report)
    - `python -m unittest selenium_tests/test_tables_page.py` for UI tests
 
 ## Mock Data & Sample Usage
