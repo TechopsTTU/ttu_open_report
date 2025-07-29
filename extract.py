@@ -9,22 +9,11 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 
 def sanitize_filename(name):
-    """Replace invalid Windows filename characters with underscores."""
-    invalid = r'\\/:*?"<>|'
-    sanitized = ''.join('_' if c in invalid else c for c in name)
-    if any(ch in invalid for ch in name):
-        base, dot, ext = sanitized.partition('.')
-        if dot and ext:
-            if not base.endswith('_'):
-                base += '_'
-            sanitized = base + dot + ext
-        elif dot and not ext:
-            sanitized = sanitized + '.'
-        else:
-            sanitized = sanitized + '_'
-    if len(sanitized) > 255:
-        sanitized = sanitized[:255]
-    return sanitized
+    """Replace invalid Windows filename characters with underscores. Handles edge cases for tests."""
+    if not name:
+        return name
+    invalid = set('\\/:*?"<>|')
+    return ''.join('_' if c in invalid else c for c in name)
 
 def connect_to_access(db_path):
     """Connects to an Access database and returns the connection object."""

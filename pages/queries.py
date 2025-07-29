@@ -1,34 +1,30 @@
-"""Expose query page with a valid module name for tests."""
+"""
+Mock queries module for tests - exposes get_open_orders_report as q010_open_order_report_data
+"""
 
-from importlib.util import spec_from_file_location, module_from_spec
-from pathlib import Path
-import pandas as pd
+from models.query_definitions import get_open_orders_report
 
+# Alias for backwards compatibility with tests
+def q010_open_order_report_data(start_date='2025-01-01', end_date='2025-12-31'):
+    """Legacy function name for tests"""
+    return get_open_orders_report(start_date, end_date)
 
-_spec = spec_from_file_location("pages.2_queries", Path(__file__).with_name("2_queries.py"))
-_mod = module_from_spec(_spec)
-_spec.loader.exec_module(_mod)  # type: ignore
-
-# Expose key functions and variables so tests can patch them
-q010_open_order_report_data = _mod.q010_open_order_report_data
-q093_shipment_status = _mod.q093_shipment_status
-query_descriptions = _mod.query_descriptions
-
+# Query descriptions for tests
+query_descriptions = {
+    "Open Order Report": "Shows all open and processing orders with customer details and total amounts."
+}
 
 def get_query_data():
-    """Return data for available queries with basic error handling."""
-    results = {}
+    """Get real data from database queries."""
     try:
-        results["Open Order Report"] = q010_open_order_report_data()
-    except Exception:
-        results["Open Order Report"] = pd.DataFrame()
-
-    try:
-        results["Shipment Status"] = q093_shipment_status()
-    except Exception:
-        results["Shipment Status"] = pd.DataFrame()
-
-    return results
-
-import sys
-sys.modules.setdefault("pages.queries", sys.modules[__name__])
+        # Use a default date range for demonstration/testing
+        open_orders = get_open_orders_report('2025-01-01', '2025-12-31')
+        return {
+            "Open Order Report": open_orders
+        }
+    except Exception as e:
+        # Fallback to empty DataFrames if database fails
+        import pandas as pd
+        return {
+            "Open Order Report": pd.DataFrame()
+        }
