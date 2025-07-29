@@ -16,9 +16,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from models.query_definitions import (
     get_sqlite_connection,
-    q010_open_order_report_data,
-    q093_shipment_status,
-    run_pass_through
+    get_open_orders_report,
+    run_query
 )
 from models.table_schema import map_column_type
 from extract import sanitize_filename
@@ -45,23 +44,14 @@ class TestDatabaseIntegration:
         """Test query functions with the actual database if it exists"""
         db_path = Path("graphite_analytics.db")
         if db_path.exists():
-            # Test open order report
-            result = q010_open_order_report_data()
+            # Test open order report (use a wide date range)
+            result = get_open_orders_report('2000-01-01', '2100-01-01')
             assert isinstance(result, pd.DataFrame)
-            
             if not result.empty:
-                expected_columns = ['OrderID', 'CustomerName', 'OrderDate', 'Status', 'TotalAmount']
+                expected_columns = ['OrderID', 'CustomerName', 'OrderDate']
                 for col in expected_columns:
                     assert col in result.columns, f"Missing column {col} in open order report"
-            
-            # Test shipment status
-            result = q093_shipment_status()
-            assert isinstance(result, pd.DataFrame)
-            
-            if not result.empty:
-                expected_columns = ['ShipmentID', 'OrderID', 'Status', 'TrackingNumber', 'ShippedDate']
-                for col in expected_columns:
-                    assert col in result.columns, f"Missing column {col} in shipment status"
+
 
 class TestDataProcessing:
     """Test suite for data processing utilities"""
@@ -189,13 +179,11 @@ class TestErrorHandling:
         # Mock a failed connection
         with patch('models.query_definitions.get_sqlite_connection', return_value=None):
             # Test that functions return empty DataFrames instead of crashing
-            result = q010_open_order_report_data()
+            result = get_open_orders_report('2000-01-01', '2000-01-02')
             assert isinstance(result, pd.DataFrame)
             assert result.empty
             
-            result = q093_shipment_status()
-            assert isinstance(result, pd.DataFrame)
-            assert result.empty
+
 
     def test_sql_execution_error_handling(self):
         """Test handling of SQL execution errors"""
@@ -206,7 +194,7 @@ class TestErrorHandling:
             mock_conn.return_value = mock_connection
             
             # Should handle errors gracefully
-            result = q010_open_order_report_data()
+            result = get_open_orders_report('2000-01-01', '2000-01-02')
             assert isinstance(result, pd.DataFrame)
             assert result.empty
 

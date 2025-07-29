@@ -1,174 +1,129 @@
 import os
+import pyodbc
+import pandas as pd
 import logging
 import sqlite3
 from pathlib import Path
-import pandas as pd
-import pyodbc
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 def get_sqlite_connection():
-    """Connect to the SQLite test database if it exists."""
+    """Connects to the SQLite test database."""
     db_path = Path("graphite_analytics.db")
     if not db_path.exists():
-        logging.warning(f"SQLite database not found: {db_path}")
-        return None
-
+        raise FileNotFoundError(f"SQLite database not found: {db_path}. Run create_real_data_db.py first.")
+    
     try:
         conn = sqlite3.connect(str(db_path))
         logging.info("SQLite database connection established.")
         return conn
     except Exception as e:
         logging.error(f"SQLite database connection failed: {e}")
-        return None
+        raise
 
-def build_connection_string():
-    """Builds the ODBC connection string from environment variables."""
+def build_pervasive_connection_string():
+    """Builds the Pervasive DB ODBC connection string from environment variables."""
     drv = os.getenv("NDUSTROS_DRIVER", "Pervasive ODBC Client Interface")
     srv = os.getenv("NDUSTROS_SERVER", "PLATSRVR")
     port = os.getenv("NDUSTROS_PORT", "1583")
     dbq = os.getenv("NDUSTROS_DB", "NdustrOS")
     user = os.getenv("NDUSTROS_USER")
     pwd = os.getenv("NDUSTROS_PASS")
-    if not user or not pwd:
-        raise ValueError("NDUSTROS_USER and NDUSTROS_PASS must be set")
-    return (
-        f"Driver={{{drv}}};"
-        f"ServerName={srv};Port={port};DBQ={dbq};"
-        f"uid={user};pwd={pwd}"
-    )
+    
+    if not all([drv, srv, port, dbq, user, pwd]):
+        raise ValueError("One or more Pervasive DB environment variables are not set.")
+        
+    return f"Driver={{{drv}}};ServerName={srv};Port={port};DBQ={dbq};uid={user};pwd={pwd}"
 
-def get_ds_connection():
-    """Attempts to connect to the NdustrOS database using ODBC."""
-    conn_str = build_connection_string()
+def get_pervasive_connection():
+    """Attempts to connect to the Pervasive database using ODBC."""
     try:
+        conn_str = build_pervasive_connection_string()
         conn = pyodbc.connect(conn_str)
-        logging.info("Database connection established.")
+        logging.info("Pervasive DB connection established.")
         return conn
     except Exception as e:
-        logging.error(f"Database connection failed: {e}")
+        logging.error(f"Pervasive DB connection failed: {e}")
         raise
 
-def run_pass_through(sql: str, params: list | tuple | None = None) -> 'pd.DataFrame':
-    """Executes a SQL query and returns the result as a DataFrame.
-
-    Parameters
-    ----------
-    sql : str
-        SQL statement to execute.
-    params : list | tuple | None
-        Optional query parameters passed to ``pandas.read_sql``. If ``None``,
-        the query executes without parameters.
+def get_db_connection():
     """
-    # Import pandas lazily to avoid mandatory dependency at import time
-    import pandas as pd
-    # Check if we're in development mode (use SQLite)
-    use_sqlite = os.getenv("USE_SQLITE", "true").lower() == "true"
+    Establishes a database connection based on the DATABASE_ENV environment variable.
+    Defaults to SQLite if the variable is not set.
+    """
+    db_env = os.getenv("DATABASE_ENV", "sqlite").lower()
     
+    if db_env == "pervasive":
+        logging.info("Connecting to Pervasive DB...")
+        return get_pervasive_connection()
+    elif db_env == "sqlite":
+        logging.info("Connecting to SQLite DB...")
+        return get_sqlite_connection()
+    else:
+        raise ValueError(f"Invalid DATABASE_ENV: '{db_env}'. Must be 'sqlite' or 'pervasive'.")
+
+def run_query(sql: str, params=None) -> pd.DataFrame:
+    """
+    Executes a SQL query against the configured database and returns a DataFrame.
+    """
     try:
-        if use_sqlite:
-            conn = get_sqlite_connection()
-            if conn is None:
-                logging.warning("SQLite connection unavailable. Returning empty DataFrame.")
-                return pd.DataFrame()
-            with conn:
-                if params:
-                    df = pd.read_sql(sql, conn, params=params)
-                else:
-                    df = pd.read_sql(sql, conn)
-        else:
-            with get_ds_connection() as conn:
-                if params:
-                    df = pd.read_sql(sql, conn, params=params)
-                else:
-                    df = pd.read_sql(sql, conn)
+        with get_db_connection() as conn:
+            df = pd.read_sql(sql, conn, params=params)
         logging.info("Query executed successfully.")
         return df
     except Exception as e:
         logging.error(f"Query execution failed: {e}")
-        return pd.DataFrame()
+        raise
 
-def q010_open_order_report_data(
-    start_date: str | None = None,
-    end_date: str | None = None,
-    customer_id: int | None = None,
-    statuses: list | None = None,
-) -> 'pd.DataFrame':
-    """Return Open Order Report data filtered by optional parameters.
+# --- Specific Query Functions ---
 
-    Parameters
-    ----------
-    start_date : str | None
-        Minimum ``OrderDate`` to include (ISO format ``YYYY-MM-DD``).
-    end_date : str | None
-        Maximum ``OrderDate`` to include.
-    customer_id : int | None
-        Limit results to a specific customer ID.
-    statuses : list | None
-        Order status values to filter. Defaults to ``['Open', 'Processing']``.
+def get_open_orders_report(start_date, end_date) -> pd.DataFrame:
     """
-
-    if statuses is None:
-        statuses = ["Open", "Processing"]
-
+    Returns Open Order Report data from the configured database.
+    The SQL is written to be compatible with both SQLite and Pervasive SQL.
+    """
     sql = """
-        SELECT
-            o.OrderID,
-            o.OrderDate,
-            c.CustomerName as CustomerName,
-            o.Status,
-            o.TotalAmount AS TotalAmount
-        FROM Orders o
-        JOIN Customers c ON o.CustomerID = c.CustomerID
-        WHERE 1=1
+    SELECT
+        o.OrderID,
+        o.OrderDate,
+        c.CustomerName,
+        o.CustomerPO,
+        p.ProductID,
+        p.ProductName,
+        od.Quantity AS QtyRemaining,
+        od.UnitPrice,
+        od.TotalCost,
+        o.Status AS OrderStatus,
+        o.DeliveryDate AS PromiseDate
+    FROM
+        Orders o
+    JOIN
+        OrderDetails od ON o.OrderID = od.OrderID
+    JOIN
+        Customers c ON o.CustomerID = c.CustomerID
+    JOIN
+        Products p ON od.ProductID = p.ProductID
+    WHERE
+        p.ProductID IS NOT NULL
+        AND o.Status IN ('BN', 'BP', 'Bp', 'NP')
+        AND o.OrderDate BETWEEN ? AND ?
+    ORDER BY o.OrderDate, o.OrderID;
     """
-
-    params: list = []
-
-    if statuses:
-        placeholders = ",".join(["?"] * len(statuses))
-        sql += f" AND o.Status IN ({placeholders})"
-        params.extend(statuses)
-
-    if start_date:
-        sql += " AND o.OrderDate >= ?"
-        params.append(start_date)
-
-    if end_date:
-        sql += " AND o.OrderDate <= ?"
-        params.append(end_date)
-
-    if customer_id:
-        sql += " AND o.CustomerID = ?"
-        params.append(customer_id)
-
-    sql += "\n    ORDER BY o.OrderDate DESC"
-
-    return run_pass_through(sql, params if params else None)
-
-def q093_shipment_status() -> 'pd.DataFrame':
-    """Returns Shipment Status data from database."""
-    sql = """
-    SELECT 
-        s.ShipmentID,
-        s.OrderID,
-        s.ShippedDate,
-        s.Status,
-        s.TrackingNumber
-    FROM Shipments s
-    JOIN Orders o ON s.OrderID = o.OrderID
-    ORDER BY s.ShippedDate DESC
-    """
-    return run_pass_through(sql)
+    return run_query(sql, params=(start_date, end_date))
 
 def test_connection():
-    """Tests the database connection and logs the result."""
+    """Tests the database connection based on the DATABASE_ENV and logs the result."""
     try:
-        with get_ds_connection() as conn:
-            logging.info("Connection successful!")
+        conn = get_db_connection()
+        logging.info("Connection successful!")
+        conn.close()
     except Exception as e:
         logging.error(f"Connection failed: {e}")
 
 if __name__ == "__main__":
+    # Example of how to test:
+    # Set DATABASE_ENV in your shell before running
+    # export DATABASE_ENV=pervasive
+    # python models/query_definitions.py
     test_connection()

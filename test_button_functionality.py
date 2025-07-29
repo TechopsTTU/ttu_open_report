@@ -9,8 +9,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-pytest.skip("Selenium tests disabled in this environment", allow_module_level=True)
-
 def test_navigation_buttons_working():
     """Test that all navigation buttons actually work and navigate to correct pages"""
     options = Options()

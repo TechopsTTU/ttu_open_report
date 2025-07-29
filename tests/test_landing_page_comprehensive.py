@@ -11,8 +11,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-pytest.skip("Selenium tests disabled in this environment", allow_module_level=True)
-
 @pytest.fixture(scope="module")
 def driver():
     """Setup Chrome driver with appropriate options for testing"""

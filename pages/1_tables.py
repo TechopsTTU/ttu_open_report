@@ -3,6 +3,9 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import numpy as np
+from selenium import webdriver
+from selenium.webdriver.edge.service import Service
+import time
 
 st.set_page_config(page_title="GraphiteVision Analytics - Tables", layout="wide")
 
@@ -80,3 +83,9 @@ st.download_button(
     mime="text/csv",
 )
 
+@classmethod
+def setUpClass(cls):
+    service = Service("C:/edgedriver_win64/msedgedriver.exe")
+    cls.driver = webdriver.Edge(service=service)
+    cls.driver.get("http://localhost:8501")
+    time.sleep(3)

@@ -6,36 +6,29 @@ import streamlit as st
 import pandas as pd
 import logging
 from pathlib import Path
-from models.query_definitions import (
-    q010_open_order_report_data,
-    q093_shipment_status,
-    # import other query funcs as you implement them
-)
+from models.query_definitions import get_open_orders_report
 
 logging.basicConfig(level=logging.INFO)
 
 # Query descriptions
 query_descriptions = {
-    "Open Order Report": "Shows all open and processing orders with customer details and total amounts.",
-    "Shipment Status": "Displays current shipment status with tracking information and delivery dates.",
+    "Open Order Report": "Shows all open and processing orders with customer details and total amounts."
 }
 
 def get_query_data():
     """Get real data from database queries."""
     try:
-        open_orders = q010_open_order_report_data()
-        shipment_status = q093_shipment_status()
+        # Use a default date range for demonstration/testing
+        open_orders = get_open_orders_report('2025-01-01', '2025-12-31')
         logging.info("Real database queries executed successfully.")
         return {
-            "Open Order Report": open_orders,
-            "Shipment Status": shipment_status,
+            "Open Order Report": open_orders
         }
     except Exception as e:
         logging.error(f"Failed to execute database queries: {e}")
         # Fallback to empty DataFrames if database fails
         return {
-            "Open Order Report": pd.DataFrame(),
-            "Shipment Status": pd.DataFrame(),
+            "Open Order Report": pd.DataFrame()
         }
 
 def main():
