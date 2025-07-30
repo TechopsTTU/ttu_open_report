@@ -37,7 +37,10 @@ pip install -r requirements.txt
 
 ### 3. Configuring environment variables
 
-Copy `.env.example` to `.env` and fill in your credentials and Access DB path.
+Copy `.env.example` to `.env` and update the values for your setup. In addition
+to credentials and `ACCESS_DB_PATH`, review the NdustrOS connection fields
+(`NDUSTROS_SERVER`, `NDUSTROS_PORT`, `NDUSTROS_DB`, `NDUSTROS_DRIVER`) and set
+`USE_SQLITE` as needed.
 
 ### 4. Running the app
 

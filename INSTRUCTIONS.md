@@ -9,13 +9,18 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
    - Use a virtual environment (recommended)
    - Run: `pip install -r requirements.txt`
 3. **Configure environment variables**
-   - Copy `.env.example` to `.env` and fill in your credentials and Access DB path
+   - Copy `.env.example` to `.env` and update values for your environment.
    - Example:
      ```
      NDUSTROS_USER=TTUSA\NDUSTROS
      NDUSTROS_PASS=your_password_here
      ACCESS_DB_PATH=Opnordrp-vlad-copy.accdb
      ACCESS_DB_DRIVER={Microsoft Access Driver (*.mdb, *.accdb)}
+     NDUSTROS_SERVER=PLATSRVR
+     NDUSTROS_PORT=1583
+     NDUSTROS_DB=NdustrOS
+     NDUSTROS_DRIVER=Pervasive ODBC Client Interface
+     USE_SQLITE=false
      ```
 4. **Run the Streamlit app**
    - `streamlit run app.py`
