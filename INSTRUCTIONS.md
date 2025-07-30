@@ -32,13 +32,25 @@ TTU Open Report is a modular Python/Streamlit application for extracting, visual
 
 ## Real DB Connection
 - Ensure you have Access drivers installed (Windows: ODBC, `pyodbc`).
-- Update `.env` with real credentials and DB path.
-- Test connection using the provided utility in `models/query_definitions.py`.
+- Set `USE_SQLITE=false` in your `.env` to run queries against the NdustrOS
+  database instead of the SQLite test DB.
+- Provide `NDUSTROS_USER` and `NDUSTROS_PASS` credentials (and adjust
+  `NDUSTROS_SERVER`, `NDUSTROS_PORT`, `NDUSTROS_DB`, and `NDUSTROS_DRIVER` if
+  needed).
+- Example:
+  ```
+  USE_SQLITE=false
+  NDUSTROS_USER=TTUSA\NDUSTROS
+  NDUSTROS_PASS=your_password_here
+  ```
+- Test the connection using the utility in `models/query_definitions.py`.
 
 ## Troubleshooting
 - **DB Connection Issues:**
   - Check `.env` and Access driver installation.
   - Use mock/sample data for UI testing if DB is unavailable.
+  - Missing `NDUSTROS_USER` or `NDUSTROS_PASS` will raise a `ValueError`
+    in `models/query_definitions.py` when building the connection string.
 - **UI Errors:**
   - Ensure sample data is present in `cache/raw/`.
   - Run tests to validate extraction and schema mapping.

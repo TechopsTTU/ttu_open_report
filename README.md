@@ -39,6 +39,15 @@ pip install -r requirements.txt
 
 Copy `.env.example` to `.env` and fill in your credentials and Access DB path.
 
+To connect to the NdustrOS database instead of the bundled SQLite test DB,
+set the following environment variables in your `.env`:
+
+```bash
+USE_SQLITE=false
+NDUSTROS_USER=TTUSA\NDUSTROS
+NDUSTROS_PASS=your_password_here
+```
+
 ### 4. Running the app
 
 - `streamlit run app.py` for the dashboard
