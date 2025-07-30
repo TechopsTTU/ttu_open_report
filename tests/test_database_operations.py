@@ -143,9 +143,7 @@ class TestQueryFunctions:
             # Mock the database connection
             conn = sqlite3.connect(mock_database)
             mock_conn.return_value = conn
-            
             result = q010_open_order_report_data()
-            
             assert isinstance(result, pd.DataFrame)
             assert not result.empty
             assert 'OrderID' in result.columns
@@ -153,11 +151,11 @@ class TestQueryFunctions:
             assert 'OrderDate' in result.columns
             assert 'Status' in result.columns
             assert 'TotalAmount' in result.columns
-            
             # Check that we got the test data
             assert len(result) > 0
             assert result.iloc[0]['CustomerName'] == 'Test Corp'
             assert result.iloc[0]['Status'] == 'Open'
+            conn.close()
 
     def test_q093_shipment_status(self, mock_database):
         """Test shipment status query"""
@@ -165,9 +163,7 @@ class TestQueryFunctions:
             # Mock the database connection
             conn = sqlite3.connect(mock_database)
             mock_conn.return_value = conn
-            
             result = q093_shipment_status()
-            
             assert isinstance(result, pd.DataFrame)
             assert not result.empty
             assert 'ShipmentID' in result.columns
@@ -175,11 +171,11 @@ class TestQueryFunctions:
             assert 'Status' in result.columns
             assert 'TrackingNumber' in result.columns
             assert 'ShippedDate' in result.columns
-            
             # Check that we got the test data
             assert len(result) > 0
             assert result.iloc[0]['TrackingNumber'] == 'TRK123'
             assert result.iloc[0]['Status'] == 'Shipped'
+            conn.close()
 
     def test_query_functions_handle_connection_failure(self):
         """Test that query functions handle database connection failures gracefully"""
