@@ -5,6 +5,9 @@ Main dashboard for navigation and overview.
 import streamlit as st
 from pathlib import Path
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
