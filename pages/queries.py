@@ -2,7 +2,15 @@
 Mock queries module for tests - exposes get_open_orders_report as q010_open_order_report_data
 """
 
-from models.query_definitions import get_open_orders_report
+from models.query_definitions import (
+    get_open_orders_report,
+    q093_shipment_status,
+)
+
+import sys
+
+# Ensure module is accessible as both 'queries' and 'pages.queries'
+sys.modules.setdefault("pages.queries", sys.modules[__name__])
 
 # Alias for backwards compatibility with tests
 def q010_open_order_report_data(start_date='2025-01-01', end_date='2025-12-31'):
@@ -11,20 +19,26 @@ def q010_open_order_report_data(start_date='2025-01-01', end_date='2025-12-31'):
 
 # Query descriptions for tests
 query_descriptions = {
-    "Open Order Report": "Shows all open and processing orders with customer details and total amounts."
+    "Open Order Report": "Shows all open and processing orders with customer details and total amounts.",
+    "Shipment Status": "Lists shipments with tracking numbers and current status.",
 }
 
 def get_query_data():
     """Get real data from database queries."""
+    import pandas as pd
+
+    # Use a default date range for demonstration/testing
     try:
-        # Use a default date range for demonstration/testing
-        open_orders = get_open_orders_report('2025-01-01', '2025-12-31')
-        return {
-            "Open Order Report": open_orders
-        }
-    except Exception as e:
-        # Fallback to empty DataFrames if database fails
-        import pandas as pd
-        return {
-            "Open Order Report": pd.DataFrame()
-        }
+        open_orders = q010_open_order_report_data('2025-01-01', '2025-12-31')
+    except Exception:
+        open_orders = pd.DataFrame()
+
+    try:
+        shipments = q093_shipment_status()
+    except Exception:
+        shipments = pd.DataFrame()
+
+    return {
+        "Open Order Report": open_orders,
+        "Shipment Status": shipments,
+    }
