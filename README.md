@@ -50,6 +50,20 @@ Copy `.env.example` to `.env` and fill in your credentials and Access DB path.
 - `python -m unittest selenium_tests/test_tables_page.py` for UI tests
 - Generate an HTML report with `pytest --html=reports/report.html --self-contained-html`
 
+### 6. Containerized deployment
+
+Build and run the application using Docker:
+
+```bash
+docker build -t graphitevision .
+docker run -p 8501:8501 graphitevision
+```
+
+### 7. Continuous Integration
+
+This repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`)
+that installs dependencies and runs the test suite on each push or pull request.
+
 Check that `cache/raw/` is populated and `schema.json` updates.
 
 See `INSTRUCTIONS.md` for full details, troubleshooting, and team onboarding.

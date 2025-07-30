@@ -145,6 +145,11 @@ def q010_open_order_report_data(
 
     return run_pass_through(sql, params if params else None)
 
+# Legacy alias expected by tests
+def get_open_orders_report(*args, **kwargs):
+    """Backward compatible wrapper for :func:`q010_open_order_report_data`."""
+    return q010_open_order_report_data(*args, **kwargs)
+
 def q093_shipment_status() -> pd.DataFrame:
     """Returns Shipment Status data from database."""
     sql = """
