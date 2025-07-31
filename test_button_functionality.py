@@ -3,22 +3,16 @@ Selenium test to verify navigation buttons work correctly
 """
 import time
 import pytest
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def test_navigation_buttons_working():
+def test_navigation_buttons_working(driver, app_server):
     """Test that all navigation buttons actually work and navigate to correct pages"""
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--window-size=1920,1080')
-    driver = webdriver.Chrome(options=options)
     
     try:
         # Navigate to main page
-        driver.get("http://localhost:8502")
+        driver.get(app_server)
         time.sleep(3)
         
         # Verify main page loads
@@ -26,7 +20,7 @@ def test_navigation_buttons_working():
         print("✅ Main page loaded successfully")
         
         # Test Data Tables button
-        driver.get("http://localhost:8502")
+        driver.get(app_server)
         time.sleep(2)
         
         # Find and click Data Tables link
@@ -40,7 +34,7 @@ def test_navigation_buttons_working():
         print("✅ Data Tables button works correctly")
         
         # Test Analytics button
-        driver.get("http://localhost:8502")
+        driver.get(app_server)
         time.sleep(2)
         
         analytics_link = driver.find_element(By.XPATH, "//a[@href='/queries']")
@@ -52,7 +46,7 @@ def test_navigation_buttons_working():
         print("✅ Analytics button works correctly")
         
         # Test Reports button
-        driver.get("http://localhost:8502")
+        driver.get(app_server)
         time.sleep(2)
         
         reports_link = driver.find_element(By.XPATH, "//a[@href='/reports']")
@@ -80,8 +74,6 @@ def test_navigation_buttons_working():
     except Exception as e:
         print(f"❌ Test failed: {e}")
         raise e
-    finally:
-        driver.quit()
 
 if __name__ == "__main__":
     print("Testing GraphiteVision Analytics navigation button functionality...")

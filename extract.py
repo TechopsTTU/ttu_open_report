@@ -9,11 +9,18 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 
 def sanitize_filename(name):
-    """Replace invalid Windows filename characters with underscores. Handles edge cases for tests."""
+    """Replace invalid filename characters and limit length.
+
+    This helper ensures generated CSV filenames are safe on all platforms
+    and do not exceed common filesystem length limits (255 characters).
+    """
     if not name:
         return name
+
     invalid = set('\\/:*?"<>|')
-    return ''.join('_' if c in invalid else c for c in name)
+    sanitized = ''.join('_' if c in invalid else c for c in name)
+    # Truncate to 255 characters which is accepted by most filesystems
+    return sanitized[:255]
 
 def connect_to_access(db_path):
     """Connects to an Access database and returns the connection object."""

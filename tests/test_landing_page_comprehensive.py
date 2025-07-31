@@ -4,30 +4,15 @@ Tests all buttons, navigation, UI elements, and functionality
 """
 import time
 import pytest
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-@pytest.fixture(scope="module")
-def driver():
-    """Setup Chrome driver with appropriate options for testing"""
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--window-size=1920,1080')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(options=options)
-    driver.implicitly_wait(10)
-    yield driver
-    driver.quit()
-
 @pytest.fixture(autouse=True)
-def setup_page(driver):
+def setup_page(driver, app_server):
     """Navigate to landing page before each test"""
-    driver.get("http://localhost:8503")  # Updated port
+    driver.get(app_server)
     time.sleep(3)  # Wait for Streamlit to fully load
 
 class TestLandingPageElements:
@@ -36,7 +21,7 @@ class TestLandingPageElements:
     def test_page_loads_successfully(self, driver):
         """Test that the landing page loads with correct title"""
         assert "GraphiteVision Analytics" in driver.title or "GraphiteVision Analytics" in driver.page_source
-        assert driver.current_url.endswith(":8503/") or driver.current_url.endswith(":8503")
+        assert driver.current_url.endswith(":8507/") or driver.current_url.endswith(":8507")
 
     def test_app_title_present(self, driver):
         """Test that the main application title is displayed"""
