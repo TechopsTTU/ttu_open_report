@@ -83,9 +83,3 @@ st.download_button(
     mime="text/csv",
 )
 
-@classmethod
-def setUpClass(cls):
-    service = Service("C:/edgedriver_win64/msedgedriver.exe")
-    cls.driver = webdriver.Edge(service=service)
-    cls.driver.get("http://localhost:8501")
-    time.sleep(3)

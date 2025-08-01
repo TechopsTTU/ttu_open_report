@@ -1,29 +1,45 @@
 {
-  "Customers": {
-    "fields": [
-      {"name": "CustomerID", "type": "integer"},
-      {"name": "Name", "type": "string"},
-      {"name": "Email", "type": "string"},
-      {"name": "JoinDate", "type": "date"}
-    ]
-  },
-  "Orders": {
-    "fields": [
-      {"name": "OrderID", "type": "integer"},
-      {"name": "CustomerID", "type": "integer"},
-      {"name": "ProductID", "type": "integer"},
-      {"name": "OrderDate", "type": "date"},
-      {"name": "Quantity", "type": "integer"},
-      {"name": "Total", "type": "float"}
-    ]
-  },
-  "Products": {
-    "fields": [
-      {"name": "ProductID", "type": "integer"},
-      {"name": "ProductName", "type": "string"},
-      {"name": "Category", "type": "string"},
-      {"name": "Price", "type": "float"},
-      {"name": "Stock", "type": "integer"}
-    ]
-  }
+  "Customers": [
+    {"name": "CustomerID", "type": "TEXT", "nullable": false},
+    {"name": "CustomerName", "type": "TEXT", "nullable": false},
+    {"name": "ContactPerson", "type": "TEXT", "nullable": true},
+    {"name": "Email", "type": "TEXT", "nullable": true},
+    {"name": "Phone", "type": "TEXT", "nullable": true},
+    {"name": "SalespersonKey", "type": "TEXT", "nullable": true},
+    {"name": "SalespersonName", "type": "TEXT", "nullable": true}
+  ],
+  "Orders": [
+    {"name": "OrderID", "type": "TEXT", "nullable": false},
+    {"name": "CustomerID", "type": "TEXT", "nullable": true},
+    {"name": "OrderDate", "type": "TEXT", "nullable": true},
+    {"name": "DeliveryDate", "type": "TEXT", "nullable": true},
+    {"name": "CustomerReqDate", "type": "TEXT", "nullable": true},
+    {"name": "Status", "type": "TEXT", "nullable": true},
+    {"name": "TotalAmount", "type": "REAL", "nullable": true},
+    {"name": "CustomerPO", "type": "TEXT", "nullable": true},
+    {"name": "SalespersonKey", "type": "TEXT", "nullable": true}
+  ],
+  "Products": [
+    {"name": "ProductID", "type": "TEXT", "nullable": false},
+    {"name": "ProductName", "type": "TEXT", "nullable": false},
+    {"name": "Description", "type": "TEXT", "nullable": true},
+    {"name": "Category", "type": "TEXT", "nullable": true},
+    {"name": "UnitPrice", "type": "REAL", "nullable": true}
+  ],
+  "OrderDetails": [
+    {"name": "OrderDetailID", "type": "INTEGER", "nullable": false},
+    {"name": "OrderID", "type": "TEXT", "nullable": false},
+    {"name": "ProductID", "type": "TEXT", "nullable": false},
+    {"name": "Quantity", "type": "INTEGER", "nullable": true},
+    {"name": "UnitPrice", "type": "REAL", "nullable": true},
+    {"name": "TotalCost", "type": "REAL", "nullable": true}
+  ],
+  "Shipments": [
+    {"name": "ShipmentID", "type": "INTEGER", "nullable": false},
+    {"name": "OrderID", "type": "TEXT", "nullable": false},
+    {"name": "ShipmentDate", "type": "TEXT", "nullable": true},
+    {"name": "TrackingNumber", "type": "TEXT", "nullable": true},
+    {"name": "Carrier", "type": "TEXT", "nullable": true},
+    {"name": "Status", "type": "TEXT", "nullable": true}
+  ]
 }
