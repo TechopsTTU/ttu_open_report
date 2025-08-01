@@ -1,0 +1,10 @@
+[tool.pytest.ini_options]
+testpaths = ["playwright_tests"]
+markers = [
+    "requires_streamlit: mark tests that need a running Streamlit app",
+]
+
+[tool.playwright]
+browsers = ["chromium"]
+screenshot = "only-on-failure"
+timeout = 30000
