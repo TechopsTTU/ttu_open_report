@@ -8,3 +8,4 @@ markers = [
 browsers = ["chromium"]
 screenshot = "only-on-failure"
 timeout = 30000
+headless = false

@@ -10,7 +10,7 @@ import time
 st.set_page_config(page_title="GraphiteVision Analytics - Tables", layout="wide")
 
 # Logo in upper right
-logo_path = Path("TTU_LOGO.jpg")
+logo_path = Path("static/TTU_LOGO.jpg")
 if logo_path.exists():
     col1, col2 = st.columns([6, 1])
     with col2:

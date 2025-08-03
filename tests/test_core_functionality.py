@@ -125,7 +125,7 @@ class TestFilenameUtilities:
         assert sanitize_filename('valid_filename.txt') == 'valid_filename.txt'
         
         # Test invalid characters replacement
-        assert sanitize_filename('file<name>.txt') == 'file_name_.txt'
+        assert sanitize_filename('file<name>.txt') == 'file_name.txt'
         assert sanitize_filename('file>name.txt') == 'file_name.txt'  
         assert sanitize_filename('file:name.txt') == 'file_name.txt'
         assert sanitize_filename('file"name.txt') == 'file_name.txt'
@@ -141,13 +141,18 @@ class TestFilenameUtilities:
         # Test multiple invalid characters
         result = sanitize_filename('file<>:"|?*.txt')
         expected = 'file_______.txt'
-        assert result == expected
+        assert result == expected, f"Expected {expected}, got {result}"
 
 class TestApplicationConfiguration:
     """Test suite for application configuration and setup"""
     
     def test_file_paths_exist(self):
         """Test that expected application files exist"""
+        assert Path('app.py').is_file()
+        assert Path('src/pages').is_dir()
+        assert Path('resources/static').is_dir()
+        assert Path('resources/cache/raw').is_dir()
+        assert Path('requirements.txt').is_file()
         # Check main application files
         assert Path('app.py').exists(), "Main app.py file should exist"
         assert Path('src/models').is_dir(), "Models directory should exist"

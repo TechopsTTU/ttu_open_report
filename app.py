@@ -102,7 +102,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # Display logo with fade-in animation if available
-    logo_path = Path("TTU_LOGO.jpg")
+    logo_path = Path("resources/static/TTU_LOGO.jpg")
     if logo_path.exists():
         st.markdown('<div class="fade-in">', unsafe_allow_html=True)
         st.image(str(logo_path), width=180)

@@ -18,7 +18,7 @@ def map_column_type(type_str):
         return 'object'
     if t in ("LONG", "INTEGER", "INT", "SMALLINT"):
         return 'int64'
-    if t == "DATETIME":
+    if t in ("DATETIME", "DATETIME2"):
         return 'datetime64[ns]'
     if t in ("BIT", "DECIMAL"):
         return 'object'
