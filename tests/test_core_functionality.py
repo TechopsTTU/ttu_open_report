@@ -126,12 +126,12 @@ class TestFilenameUtilities:
         
         # Test invalid characters replacement
         assert sanitize_filename('file<name>.txt') == 'file_name_.txt'
-        assert sanitize_filename('file>name.txt') == 'file_name_.txt'
-        assert sanitize_filename('file:name.txt') == 'file_name_.txt'
-        assert sanitize_filename('file"name.txt') == 'file_name_.txt'
-        assert sanitize_filename('file|name.txt') == 'file_name_.txt'
-        assert sanitize_filename('file?name.txt') == 'file_name_.txt'
-        assert sanitize_filename('file*name.txt') == 'file_name_.txt'
+        assert sanitize_filename('file>name.txt') == 'file_name.txt'  
+        assert sanitize_filename('file:name.txt') == 'file_name.txt'
+        assert sanitize_filename('file"name.txt') == 'file_name.txt'
+        assert sanitize_filename('file|name.txt') == 'file_name.txt'
+        assert sanitize_filename('file?name.txt') == 'file_name.txt'
+        assert sanitize_filename('file*name.txt') == 'file_name.txt'
 
     def test_sanitize_filename_edge_cases(self):
         """Test filename sanitization edge cases"""
@@ -150,7 +150,7 @@ class TestApplicationConfiguration:
         """Test that expected application files exist"""
         # Check main application files
         assert Path('app.py').exists(), "Main app.py file should exist"
-        assert Path('models').is_dir(), "Models directory should exist"
+        assert Path('src/models').is_dir(), "Models directory should exist"
         assert Path('pages').is_dir(), "Pages directory should exist"
         assert Path('tests').is_dir(), "Tests directory should exist"
 
@@ -177,7 +177,7 @@ class TestErrorHandling:
     def test_database_connection_failure_handling(self):
         """Test handling of database connection failures"""
         # Mock a failed connection
-        with patch('models.query_definitions.get_sqlite_connection', return_value=None):
+        with patch('models.query_definitions.get_db_connection', return_value=None):
             # Test that functions return empty DataFrames instead of crashing
             result = get_open_orders_report('2000-01-01', '2000-01-02')
             assert isinstance(result, pd.DataFrame)

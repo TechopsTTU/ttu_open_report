@@ -106,12 +106,13 @@ def create_real_data_database():
         # Load and process real data from OO_ReportData.csv
         logging.info("Loading real data from OO_ReportData.csv...")
         
-        if not Path("extracted_data/OO_ReportData.csv").exists():
+        oo_report_path = Path("resources/cache/cache/raw/OO_ReportData.csv")
+        if not oo_report_path.exists():
             logging.error("OO_ReportData.csv not found. Please run the extraction first.")
             return
         
         # Read the main open orders data
-        df_orders = pd.read_csv("extracted_data/OO_ReportData.csv")
+        df_orders = pd.read_csv(str(oo_report_path))
         logging.info(f"Loaded {len(df_orders)} order records")
         
         # Extract unique customers
@@ -205,7 +206,7 @@ def create_real_data_database():
             ))
         
         # Load shipment data if available
-        shipment_file = Path("extracted_data/zzztblShipmentStatus.csv")
+        shipment_file = Path("resources/cache/cache/raw/zzztblShipmentStatus.csv")
         if shipment_file.exists():
             logging.info("Loading shipment data from zzztblShipmentStatus.csv...")
             df_shipments = pd.read_csv(shipment_file)

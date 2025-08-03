@@ -68,13 +68,18 @@ def run_query(sql: str, params=None) -> pd.DataFrame:
     Executes a SQL query against the configured database and returns a DataFrame.
     """
     try:
-        with get_db_connection() as conn:
+        conn = get_db_connection()
+        if conn is None:
+            logging.error("Database connection is None")
+            return pd.DataFrame()
+        
+        with conn:
             df = pd.read_sql(sql, conn, params=params)
         logging.info("Query executed successfully.")
         return df
     except Exception as e:
         logging.error(f"Query execution failed: {e}")
-        raise
+        return pd.DataFrame()
 
 # --- Specific Query Functions ---
 

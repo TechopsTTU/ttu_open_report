@@ -1,11 +1,14 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(claude /init)",
-      "Bash(claude init)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -m pytest tests/ --tb=short -x)",
+      "Bash(python -m pytest tests/test_core_functionality.py tests/test_database_operations.py tests/test_extract.py tests/test_table_schema_module.py -v)",
       "Bash(python:*)",
-      "Bash(timeout:*)"
+      "Bash(rm:*)",
+      "Bash(findstr:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
