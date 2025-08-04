@@ -10,71 +10,143 @@ from pathlib import Path
 import sys
 sys.path.append('src')
 from models.query_definitions import get_db_connection, run_query
+from models.table_mapping import get_database_type
+from utils.currency_formatter import display_currency_dataframe
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-# Business query definitions
-business_queries = {
-    "Customer Order Volume": """
-        SELECT 
-            c.CustomerName,
-            COUNT(o.OrderID) AS TotalOrders,
-            SUM(od.TotalCost) AS TotalOrderValue
-        FROM 
-            Orders o
-        JOIN 
-            Customers c ON o.CustomerID = c.CustomerID
-        JOIN 
-            OrderDetails od ON o.OrderID = od.OrderID
-        WHERE 
-            o.OrderDate BETWEEN ? AND ?
-        GROUP BY 
-            c.CustomerName
-        ORDER BY 
-            TotalOrderValue DESC
-    """,
+# Business query definitions - environment-aware
+def get_business_queries():
+    """Get database-specific business queries based on current environment."""
+    db_type = get_database_type()
     
-    "Product Performance": """
-        SELECT 
-            p.ProductID,
-            p.ProductName,
-            COUNT(od.OrderID) AS TimesOrdered,
-            SUM(od.Quantity) AS TotalQuantity,
-            SUM(od.TotalCost) AS TotalRevenue,
-            AVG(od.UnitPrice) AS AveragePrice
-        FROM 
-            OrderDetails od
-        JOIN 
-            Products p ON od.ProductID = p.ProductID
-        JOIN 
-            Orders o ON od.OrderID = o.OrderID
-        WHERE 
-            o.OrderDate BETWEEN ? AND ?
-        GROUP BY 
-            p.ProductID, p.ProductName
-        ORDER BY 
-            TotalRevenue DESC
-    """,
-    
-    "Order Status Summary": """
-        SELECT 
-            o.Status AS OrderStatus,
-            COUNT(o.OrderID) AS OrderCount,
-            SUM(od.TotalCost) AS TotalValue,
-            MIN(o.OrderDate) AS EarliestOrder,
-            MAX(o.OrderDate) AS LatestOrder
-        FROM 
-            Orders o
-        JOIN 
-            OrderDetails od ON o.OrderID = od.OrderID
-        WHERE 
-            o.OrderDate BETWEEN ? AND ?
-        GROUP BY 
-            o.Status
-        ORDER BY 
-            OrderCount DESC
-    """
-}
+    if db_type == 'pervasive':
+        return {
+            "Customer Order Volume": """
+                SELECT TOP 50
+                    l.Ordernumber,
+                    COUNT(l.Ordernumber) AS TotalLineItems,
+                    SUM(l.Qtyordered * l.Unitprice) AS TotalOrderValue,
+                    AVG(l.Unitprice) AS AvgPrice
+                FROM 
+                    OELIN l
+                WHERE 
+                    l.Qtyordered > 0
+                    AND l.Unitprice > 0
+                GROUP BY 
+                    l.Ordernumber
+                ORDER BY 
+                    TotalOrderValue DESC
+            """,
+            
+            "Product Performance": """
+                SELECT TOP 50
+                    l.Itemkey AS ProductID,
+                    l.Itemdescription AS ProductName,
+                    COUNT(l.Ordernumber) AS TimesOrdered,
+                    SUM(l.Qtyordered) AS TotalQuantity,
+                    SUM(l.Qtyordered * l.Unitprice) AS TotalRevenue,
+                    AVG(l.Unitprice) AS AveragePrice
+                FROM 
+                    OELIN l
+                WHERE 
+                    l.Itemkey IS NOT NULL
+                    AND l.Itemkey <> ''
+                    AND l.Qtyordered > 0
+                    AND l.Unitprice > 0
+                GROUP BY 
+                    l.Itemkey, l.Itemdescription
+                ORDER BY 
+                    TotalRevenue DESC
+            """,
+            
+            "Order Status Summary": """
+                SELECT TOP 20
+                    'Active' AS OrderStatus,
+                    COUNT(DISTINCT l.Ordernumber) AS OrderCount,
+                    SUM(l.Qtyordered * l.Unitprice) AS TotalValue,
+                    MIN(l.Ordernumber) AS EarliestOrder,
+                    MAX(l.Ordernumber) AS LatestOrder
+                FROM 
+                    OELIN l
+                WHERE 
+                    l.Qtyordered > 0
+                    AND l.Unitprice > 0
+                GROUP BY 
+                    'Active'
+                ORDER BY 
+                    OrderCount DESC
+            """
+        }
+    else:
+        # SQLite queries (original)
+        return {
+            "Customer Order Volume": """
+                SELECT 
+                    c.CustomerName,
+                    COUNT(o.OrderID) AS TotalOrders,
+                    SUM(od.TotalCost) AS TotalOrderValue
+                FROM 
+                    Orders o
+                JOIN 
+                    Customers c ON o.CustomerID = c.CustomerID
+                JOIN 
+                    OrderDetails od ON o.OrderID = od.OrderID
+                WHERE 
+                    o.OrderDate BETWEEN ? AND ?
+                GROUP BY 
+                    c.CustomerName
+                ORDER BY 
+                    TotalOrderValue DESC
+            """,
+            
+            "Product Performance": """
+                SELECT 
+                    p.ProductID,
+                    p.ProductName,
+                    COUNT(od.OrderID) AS TimesOrdered,
+                    SUM(od.Quantity) AS TotalQuantity,
+                    SUM(od.TotalCost) AS TotalRevenue,
+                    AVG(od.UnitPrice) AS AveragePrice
+                FROM 
+                    OrderDetails od
+                JOIN 
+                    Products p ON od.ProductID = p.ProductID
+                JOIN 
+                    Orders o ON od.OrderID = o.OrderID
+                WHERE 
+                    o.OrderDate BETWEEN ? AND ?
+                GROUP BY 
+                    p.ProductID, p.ProductName
+                ORDER BY 
+                    TotalRevenue DESC
+            """,
+            
+            "Order Status Summary": """
+                SELECT 
+                    o.Status AS OrderStatus,
+                    COUNT(o.OrderID) AS OrderCount,
+                    SUM(od.TotalCost) AS TotalValue,
+                    MIN(o.OrderDate) AS EarliestOrder,
+                    MAX(o.OrderDate) AS LatestOrder
+                FROM 
+                    Orders o
+                JOIN 
+                    OrderDetails od ON o.OrderID = od.OrderID
+                WHERE 
+                    o.OrderDate BETWEEN ? AND ?
+                GROUP BY 
+                    o.Status
+                ORDER BY 
+                    OrderCount DESC
+            """
+        }
+
+business_queries = get_business_queries()
 
 # Query descriptions
 query_descriptions = {
@@ -123,13 +195,26 @@ def main():
         st.info(query_descriptions.get(choice, ""))
         
         try:
-            # Execute the selected query with date parameters
-            query = business_queries[choice]
-            with get_db_connection() as conn:
-                df = pd.read_sql(query, conn, params=(start_date, end_date))
+            # Get fresh queries based on current database type
+            current_queries = get_business_queries()
+            query = current_queries[choice]
+            
+            # Display database info
+            db_type = get_database_type()
+            st.info(f"Running query against: {db_type.upper()} database")
+            
+            # Execute the query using run_query for proper parameter handling
+            # For Pervasive, skip date parameters due to date format issues
+            if db_type == 'pervasive':
+                df = run_query(query)  # No date parameters for production
+                st.warning("Note: Production queries run against all available data (date filtering temporarily disabled)")
+            else:
+                df = run_query(query, params=(start_date, end_date))
             
             if not df.empty:
-                st.dataframe(df, use_container_width=True)
+                # Format currency columns before display
+                formatted_df = display_currency_dataframe(df)
+                st.dataframe(formatted_df, use_container_width=True)
                 
                 # Show summary stats
                 st.subheader("Summary")

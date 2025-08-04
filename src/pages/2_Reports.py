@@ -30,7 +30,7 @@ with col1:
 
 with col2:
     if st.button("📈 Interactive Reports", use_container_width=True):
-        st.switch_page("pages/3_reports.py")
+        st.switch_page("pages/interactive_reports.py")
     
     st.markdown("Interactive charts and visualizations for business data analysis.")
 

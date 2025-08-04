@@ -20,6 +20,7 @@ from pathlib import Path
 import sys
 sys.path.append('src')
 from models.query_definitions import get_db_connection, run_query
+from utils.currency_formatter import format_currency
 
 # Logo in upper right
 logo_path = Path("static/TTU_LOGO.jpg")
@@ -139,10 +140,10 @@ try:
             st.metric("Total Orders", len(df), f"{len(df) - len(get_demo_data()) // 2:+}")
         with col2:
             total_sales = df['TotalAmount'].sum()
-            st.metric("Total Sales", f"${total_sales:,.2f}", f"{5.2:+}%")
+            st.metric("Total Sales", format_currency(total_sales), f"{5.2:+}%")
         with col3:
             avg_order = total_sales / len(df) if len(df) > 0 else 0
-            st.metric("Average Order Value", f"${avg_order:,.2f}", f"{2.1:+}%")
+            st.metric("Average Order Value", format_currency(avg_order), f"{2.1:+}%")
             
         # Monthly trend chart
         st.subheader("Monthly Sales Trend")

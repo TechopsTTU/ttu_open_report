@@ -50,36 +50,81 @@ def get_pervasive_connection():
 def get_db_connection():
     """
     Establishes a database connection based on the DATABASE_ENV environment variable.
-    Defaults to SQLite if the variable is not set.
+    Falls back to SQLite if Pervasive connection fails or is not specified.
     """
     db_env = os.getenv("DATABASE_ENV", "sqlite").lower()
     
     if db_env == "pervasive":
-        logging.info("Connecting to Pervasive DB...")
-        return get_pervasive_connection()
-    elif db_env == "sqlite":
-        logging.info("Connecting to SQLite DB...")
-        return get_sqlite_connection()
-    else:
-        raise ValueError(f"Invalid DATABASE_ENV: '{db_env}'. Must be 'sqlite' or 'pervasive'.")
+        try:
+            logging.info("Attempting to connect to Pervasive DB...")
+            return get_pervasive_connection()
+        except Exception as e:
+            logging.warning(f"Pervasive DB connection failed: {e}. Falling back to SQLite.")
+            # Fallback to SQLite
+            os.environ["DATABASE_ENV"] = "sqlite"
+            return get_sqlite_connection()
+    
+    # Default to SQLite
+    logging.info("Connecting to SQLite DB...")
+    return get_sqlite_connection()
 
 def run_query(sql: str, params=None) -> pd.DataFrame:
     """
     Executes a SQL query against the configured database and returns a DataFrame.
+    Dynamically adapts SQL syntax for compatibility with Pervasive and SQLite.
     """
     try:
+        db_env = os.getenv("DATABASE_ENV", "sqlite").lower()
         conn = get_db_connection()
+        
         if conn is None:
             logging.error("Database connection is None")
             return pd.DataFrame()
-        
+
+        # Pervasive-specific SQL adjustments
+        if db_env == "pervasive":
+            # 1. Replace '?' placeholders with actual parameters for Pervasive
+            if params:
+                # Basic parameter substitution, assuming '?' placeholders
+                # WARNING: This is a simplified approach. For production, use a more robust method.
+                sql_parts = sql.split('?')
+                if len(sql_parts) - 1 == len(params):
+                    sql_with_params = sql_parts[0]
+                    for i, param in enumerate(params):
+                        # Properly format different parameter types
+                        if isinstance(param, str):
+                            sql_with_params += f"'{param}'"
+                        elif hasattr(param, 'strftime'):  # datetime object
+                            sql_with_params += f"'{param.strftime('%Y-%m-%d')}'"
+                        elif hasattr(param, 'isoformat'):  # date object
+                            sql_with_params += f"'{param.isoformat()}'"
+                        else:
+                            sql_with_params += str(param)
+                        sql_with_params += sql_parts[i+1]
+                    sql = sql_with_params
+                params = None  # Parameters are now part of the SQL string
+
+            # 2. Replace LIMIT with TOP for Pervasive
+            if "LIMIT" in sql.upper():
+                import re
+                match = re.search(r"LIMIT\s+(\d+)", sql, re.IGNORECASE)
+                if match:
+                    limit_val = match.group(1)
+                    # Remove the LIMIT clause
+                    sql = re.sub(r"LIMIT\s+\d+", "", sql, flags=re.IGNORECASE)
+                    # Add TOP to the SELECT statement
+                    sql = re.sub(r"SELECT", f"SELECT TOP {limit_val}", sql, count=1, flags=re.IGNORECASE)
+
         with conn:
-            df = pd.read_sql(sql, conn, params=params)
+            df = pd.read_sql(sql, conn, params=params if params else None)
+        
         logging.info("Query executed successfully.")
         return df
     except Exception as e:
         logging.error(f"Query execution failed: {e}")
         return pd.DataFrame()
+
+from src.models.pervasive_db import get_open_orders_report_pervasive
 
 # --- Specific Query Functions ---
 
@@ -88,34 +133,38 @@ def get_open_orders_report(start_date, end_date) -> pd.DataFrame:
     Returns Open Order Report data from the configured database.
     The SQL is written to be compatible with both SQLite and Pervasive SQL.
     """
-    sql = """
-    SELECT
-        o.OrderID,
-        o.OrderDate,
-        c.CustomerName,
-        o.CustomerPO,
-        p.ProductID,
-        p.ProductName,
-        od.Quantity AS QtyRemaining,
-        od.UnitPrice,
-        od.TotalCost,
-        o.Status AS OrderStatus,
-        o.DeliveryDate AS PromiseDate
-    FROM
-        Orders o
-    JOIN
-        OrderDetails od ON o.OrderID = od.OrderID
-    JOIN
-        Customers c ON o.CustomerID = c.CustomerID
-    JOIN
-        Products p ON od.ProductID = p.ProductID
-    WHERE
-        p.ProductID IS NOT NULL
-        AND o.Status IN ('BN', 'BP', 'Bp', 'NP')
-        AND o.OrderDate BETWEEN ? AND ?
-    ORDER BY o.OrderDate, o.OrderID;
-    """
-    return run_query(sql, params=(start_date, end_date))
+    db_env = os.getenv("DATABASE_ENV", "sqlite").lower()
+    if db_env == "pervasive":
+        return get_open_orders_report_pervasive(start_date, end_date)
+    else:
+        sql = """
+        SELECT
+            o.OrderID,
+            o.OrderDate,
+            c.CustomerName,
+            o.CustomerPO,
+            p.ProductID,
+            p.ProductName,
+            od.Quantity AS QtyRemaining,
+            od.UnitPrice,
+            od.TotalCost,
+            o.Status AS OrderStatus,
+            o.DeliveryDate AS PromiseDate
+        FROM
+            Orders o
+        JOIN
+            OrderDetails od ON o.OrderID = od.OrderID
+        JOIN
+            Customers c ON o.CustomerID = c.CustomerID
+        JOIN
+            Products p ON od.ProductID = p.ProductID
+        WHERE
+            p.ProductID IS NOT NULL
+            AND o.Status IN ('BN', 'BP', 'Bp', 'NP')
+            AND o.OrderDate BETWEEN ? AND ?
+        ORDER BY o.OrderDate, o.OrderID;
+        """
+        return run_query(sql, params=(start_date, end_date))
 
 def test_connection():
     """Tests the database connection based on the DATABASE_ENV and logs the result."""

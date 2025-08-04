@@ -6,6 +6,11 @@ import numpy as np
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 st.set_page_config(page_title="GraphiteVision Analytics - Tables", layout="wide")
 
@@ -18,7 +23,7 @@ if logo_path.exists():
 
 st.title("Data Tables")
 st.markdown("""
-Welcome to GraphiteVision Analytics. Select a table below to preview its schema and data. Use the search box to filter results. Download any table as CSV for further analysis.
+Welcome to GraphiteVision Analytics. Select a table below to preview its data. Use the search box to filter results. Download any table as CSV for further analysis.
 """)
 
 # 1. load schema.json
@@ -41,22 +46,25 @@ if not table_names:
 st.subheader("Select a Table")
 table_selected = st.radio("Select a table:", table_names, horizontal=True)
 
-# Show schema details for selected table
+# Show schema details for selected table (controlled by environment variable)
 columns = schema[table_selected]
-st.subheader("Schema")
-# When displaying schema, handle missing 'nullable' key gracefully
-schema_table = []
-for col in columns:
-    if isinstance(col, dict):
-        schema_table.append({
-            "Column": col.get("name", "N/A"),
-            "Type": col.get("type", "N/A"),
-            "Nullable": col.get("nullable", "N/A")
-        })
-    else:
-        # Optionally log or display a warning for malformed schema entry
-        pass
-st.table(schema_table)
+show_schema = os.getenv("SHOW_SCHEMA_TABLES", "false").lower() == "true"
+
+if show_schema:
+    st.subheader("Schema")
+    # When displaying schema, handle missing 'nullable' key gracefully
+    schema_table = []
+    for col in columns:
+        if isinstance(col, dict):
+            schema_table.append({
+                "Column": col.get("name", "N/A"),
+                "Type": col.get("type", "N/A"),
+                "Nullable": col.get("nullable", "N/A")
+            })
+        else:
+            # Optionally log or display a warning for malformed schema entry
+            pass
+    st.table(schema_table)
 
 # Data preview and search/filter
 csv_path = Path("resources") / "cache" / "raw" / f"{table_selected}.csv"

@@ -4,7 +4,15 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime, date
 import logging
+import sys
+sys.path.append('src')
+from models.query_definitions import run_query
+from models.table_mapping import get_database_type
+from utils.currency_formatter import display_currency_dataframe
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # Logo in upper right
@@ -15,21 +23,36 @@ if logo_path.exists():
         st.image(str(logo_path), width=120)
 
 st.title("Business Data Entry Portal")
+
+# Show which database environment we're using
+db_type = get_database_type()
+if db_type == 'pervasive':
+    st.success("🔗 Connected to PRODUCTION Pervasive database")
+else:
+    st.info("🔗 Connected to DEVELOPMENT SQLite database")
+
 st.markdown("""
 Enter new business data through secure forms. These forms connect directly to your operational database and support real business workflows.
 """)
 
-# Database connection helper
-def get_db_connection():
-    return sqlite3.connect("graphite_analytics.db")
-
-# Get customers and products for dropdowns
+# Get customers and products for dropdowns - environment aware
 def load_reference_data():
     try:
-        with get_db_connection() as conn:
-            customers_df = pd.read_sql("SELECT CustomerID, CustomerName FROM Customers ORDER BY CustomerName", conn)
-            products_df = pd.read_sql("SELECT ProductID, ProductName FROM Products ORDER BY ProductName", conn)
-            return customers_df, products_df
+        db_type = get_database_type()
+        
+        if db_type == 'pervasive':
+            # Use production Pervasive database
+            customers_query = "SELECT TOP 50 Customerkey AS CustomerID, Customername AS CustomerName FROM ARCUST ORDER BY Customername"
+            products_query = "SELECT TOP 50 DISTINCT Itemkey AS ProductID, Itemdescription AS ProductName FROM OELIN WHERE Itemkey IS NOT NULL AND Itemkey <> '' ORDER BY Itemdescription"
+        else:
+            # Use SQLite database
+            customers_query = "SELECT CustomerID, CustomerName FROM Customers ORDER BY CustomerName"
+            products_query = "SELECT ProductID, ProductName FROM Products ORDER BY ProductName"
+        
+        customers_df = run_query(customers_query)
+        products_df = run_query(products_query)
+        
+        return customers_df, products_df
     except Exception as e:
         logging.error(f"Failed to load reference data: {e}")
         return pd.DataFrame(), pd.DataFrame()
@@ -216,7 +239,9 @@ try:
         """, conn)
         
         if not recent_orders.empty:
-            st.dataframe(recent_orders, use_container_width=True)
+            # Format currency columns before display
+            formatted_orders = display_currency_dataframe(recent_orders)
+            st.dataframe(formatted_orders, use_container_width=True)
         else:
             st.info("No recent orders to display.")
             

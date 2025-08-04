@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 sys.path.append('src')
 from models.query_definitions import get_open_orders_report
+from utils.currency_formatter import display_currency_dataframe
 
 logging.basicConfig(level=logging.INFO)
 
@@ -121,7 +122,8 @@ def main():
                 ]
                 
                 # Show filtered data
-                st.dataframe(filtered_df, use_container_width=True)
+                formatted_df = display_currency_dataframe(filtered_df)
+                st.dataframe(formatted_df, use_container_width=True)
                 
                 # Show summary stats
                 st.subheader("Summary")
@@ -156,7 +158,8 @@ def main():
                     logging.error(f"Download failed: {e}")
                     st.error("Download failed.")
         else:
-            st.dataframe(df, use_container_width=True)
+            formatted_df = display_currency_dataframe(df)
+            st.dataframe(formatted_df, use_container_width=True)
             st.subheader("Summary")
             st.write(f"Total records: {len(df)}")
             

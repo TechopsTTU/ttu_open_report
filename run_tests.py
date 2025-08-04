@@ -22,14 +22,21 @@ def run_tests():
     """Run all tests in a specific order"""
     logger.info("Starting TTU Open Report test suite...")
     
-    test_order = [
-        "tests/test_01_database_connection.py",  # Basic database connectivity
-        "tests/test_02_query_functions.py",      # Query functionality
-        "tests/test_03_page_loads.py",           # Page imports
-        "tests/test_04_data_extraction.py",      # Data extraction
-        "tests/test_05_ui_components.py",        # UI components
-        "tests/test_06_core_application.py",     # Core application
-    ]
+    db_env = os.environ.get('DATABASE_ENV', 'sqlite').lower()
+
+    if db_env == 'pervasive':
+        test_order = [
+            "tests/test_07_pervasive_integration.py"  # Pervasive DB integration tests
+        ]
+    else:
+        test_order = [
+            "tests/test_01_database_connection.py",  # Basic database connectivity
+            "tests/test_02_query_functions.py",      # Query functionality
+            "tests/test_03_page_loads.py",           # Page imports
+            "tests/test_04_data_extraction.py",      # Data extraction
+            "tests/test_05_ui_components.py",        # UI components
+            "tests/test_06_core_application.py",     # Core application
+        ]
     
     # First check if all test files exist
     missing_files = [f for f in test_order if not Path(f).exists()]

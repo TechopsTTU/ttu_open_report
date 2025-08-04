@@ -21,7 +21,7 @@ def analyze_access_db_structure():
     db_file = os.path.abspath('Opnordrp-vlad-copy.accdb')
     
     if not os.path.exists(db_file):
-        print(f"❌ ERROR: Database file not found at '{db_file}'")
+        print(f"ERROR: Database file not found at '{db_file}'")
         print("Please ensure you are in the 'dev' branch and the file is present.")
         return
 
@@ -31,7 +31,7 @@ def analyze_access_db_structure():
     driver = '{Microsoft Access Driver (*.mdb, *.accdb)}'
     conn_str = f'DRIVER={driver};DBQ={db_file};'
 
-    print(f"🚀 Connecting to Access DB: {os.path.basename(db_file)}")
+    print(f"Connecting to Access DB: {os.path.basename(db_file)}")
 
     try:
         conn = pyodbc.connect(conn_str)
@@ -60,12 +60,12 @@ def analyze_access_db_structure():
         for query in sorted(queries):
             print(f"  - {query}")
 
-        print("\n✅ Analysis complete.")
+        print("Analysis complete.")
         print("\nNEXT STEP: Please identify the query from the list above that is most likely related to the 'Open Order Report'.")
 
     except pyodbc.Error as e:
-        print(f"❌ DATABASE CONNECTION ERROR: {e}")
-        print("\n--- TROUBLESHOOTING ---")
+        print(f"DATABASE CONNECTION ERROR: {e}")
+        print("--- TROUBLESHOOTING ---")
         print("1. Ensure you have the 'Microsoft Access Database Engine 2016 Redistributable' installed.")
         print("   You can download it from the official Microsoft website.")
         print("2. Make sure no other application (like MS Access itself) has the database file open.")

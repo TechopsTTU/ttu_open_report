@@ -24,13 +24,13 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("📊 Open Order Report", use_container_width=True):
-        st.switch_page("5_open_order_report.py")
+        st.switch_page("pages/5_open_order_report.py")
     
     st.markdown("View all open and processing orders with customer details and delivery dates.")
 
 with col2:
     if st.button("📈 Interactive Reports", use_container_width=True):
-        st.switch_page("3_reports.py")
+        st.switch_page("pages/interactive_reports.py")
     
     st.markdown("Interactive charts and visualizations for business data analysis.")
 

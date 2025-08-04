@@ -5,6 +5,10 @@ Tests query functions and database operations
 import pytest
 import sys
 import pandas as pd
+import os
+
+# Set environment to use SQLite for tests
+os.environ["DATABASE_ENV"] = "sqlite"
 
 # Add src to path for imports
 sys.path.append('src')

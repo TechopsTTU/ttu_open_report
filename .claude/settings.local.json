@@ -13,7 +13,9 @@
       "Bash(cp:*)",
       "Bash(sqlite3:*)",
       "Bash(ls:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(streamlit run:*)",
+      "Bash(start http://localhost:8501)"
     ],
     "deny": []
   }
