@@ -32,7 +32,7 @@ def test_navigation_buttons():
         except Exception as e:
             print(f"❌ {page.title()} page failed: {e}")
     
-    return True
+    # No return value for pytest compatibility
 
 if __name__ == "__main__":
     print("Testing GraphiteVision Analytics navigation buttons...")

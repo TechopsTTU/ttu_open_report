@@ -10,7 +10,10 @@
       "Bash(grep:*)",
       "Bash(git add:*)",
       "Bash(copy:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(sqlite3:*)",
+      "Bash(ls:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

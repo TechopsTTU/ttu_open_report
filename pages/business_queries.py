@@ -7,6 +7,8 @@ import pandas as pd
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
+import sys
+sys.path.append('src')
 from models.query_definitions import get_db_connection, run_query
 
 logging.basicConfig(level=logging.INFO)

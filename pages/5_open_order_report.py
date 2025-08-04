@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import date
 from pathlib import Path
-from models.query_definitions import get_open_orders_report
+from src.models.query_definitions import get_open_orders_report
 
 # Logo in upper right
 logo_path = Path("static/TTU_LOGO.jpg")

@@ -17,6 +17,8 @@ except ImportError:
     st.warning("Plotly is not installed. Some visualizations will use Altair instead. Install plotly with 'pip install plotly'.")
 from datetime import datetime, timedelta
 from pathlib import Path
+import sys
+sys.path.append('src')
 from models.query_definitions import get_db_connection, run_query
 
 # Logo in upper right

@@ -3,8 +3,6 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import numpy as np
-from selenium import webdriver
-from selenium.webdriver.edge.service import Service
 import time
 
 st.set_page_config(page_title="GraphiteVision Analytics - Tables", layout="wide")
@@ -63,13 +61,60 @@ csv_path = Path("resources") / "cache" / "raw" / f"{table_selected}.csv"
 if csv_path.exists():
     df = pd.read_csv(csv_path)
 else:
-    # Generate mock data if CSV is missing
-    np.random.seed(42)
-    col_names = [col["name"] for col in columns]
-    df = pd.DataFrame({
-        name: np.random.choice([f"Sample {name} {i}" for i in range(1, 21)], 20)
-        for name in col_names
-    })
+    # Try to get data from database first
+    import sqlite3
+    try:
+        conn = sqlite3.connect("graphite_analytics.db")
+        # Check if the table exists in our database
+        if table_selected in ["Customers", "Products", "Orders", "OrderDetails", "Shipments"]:
+            df = pd.read_sql(f"SELECT * FROM {table_selected} LIMIT 100", conn)
+        else:
+            # Generate realistic mock data based on table name
+            np.random.seed(42)
+            col_names = [col["name"] for col in columns]
+            
+            if "customer" in table_selected.lower():
+                # Customer-like data
+                df = pd.DataFrame({
+                    "CustomerID": [f"CUST{i:03d}" for i in range(1, 21)],
+                    "CustomerName": [f"Industrial Corp {i}" for i in range(1, 21)],
+                    "ContactPerson": [f"Manager {i}" for i in range(1, 21)],
+                    "Email": [f"manager{i}@company.com" for i in range(1, 21)],
+                    "Phone": [f"555-{1000+i:04d}" for i in range(1, 21)]
+                })
+            elif "product" in table_selected.lower():
+                # Product-like data
+                df = pd.DataFrame({
+                    "ProductID": [f"PART{i:03d}" for i in range(1, 21)],
+                    "ProductName": [f"Graphite Component {chr(65+i%26)}" for i in range(1, 21)],
+                    "Description": [f"High-quality industrial component for manufacturing" for i in range(1, 21)],
+                    "Category": np.random.choice(["Graphite", "Carbon", "Heat Shield", "Conductive"], 20),
+                    "UnitPrice": np.random.uniform(500, 5000, 20).round(2)
+                })
+            elif "order" in table_selected.lower():
+                # Order-like data
+                df = pd.DataFrame({
+                    "OrderID": [f"ORD{31000+i}" for i in range(1, 21)],
+                    "CustomerID": [f"CUST{i%10:03d}" for i in range(1, 21)],
+                    "OrderDate": pd.date_range("2023-01-01", periods=20, freq="D").strftime('%Y-%m-%d'),
+                    "Status": np.random.choice(["Open", "Processing", "Shipped", "Delivered"], 20),
+                    "TotalAmount": np.random.uniform(1000, 50000, 20).round(2)
+                })
+            else:
+                # Generic data
+                df = pd.DataFrame({
+                    name: np.random.choice([f"Sample {name} {i}" for i in range(1, 21)], 20)
+                    for name in col_names[:5]  # Limit to 5 columns for display
+                })
+        conn.close()
+    except Exception as e:
+        # Fallback to original mock data
+        np.random.seed(42)
+        col_names = [col["name"] for col in columns]
+        df = pd.DataFrame({
+            name: np.random.choice([f"Sample {name} {i}" for i in range(1, 21)], 20)
+            for name in col_names[:5]  # Limit to 5 columns for display
+        })
 
 search = st.text_input("Search table (case-insensitive)")
 if search:

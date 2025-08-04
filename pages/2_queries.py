@@ -6,6 +6,8 @@ import streamlit as st
 import pandas as pd
 import logging
 from pathlib import Path
+import sys
+sys.path.append('src')
 from models.query_definitions import get_open_orders_report
 
 logging.basicConfig(level=logging.INFO)

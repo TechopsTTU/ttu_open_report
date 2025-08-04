@@ -42,7 +42,6 @@ def run_playwright_tests():
     
     # Set environment variables for visible browser
     env = {
-        "PLAYWRIGHT_BROWSERS_PATH": "0",
         "PWDEBUG": "1",  # Enable debug mode
     }
     
